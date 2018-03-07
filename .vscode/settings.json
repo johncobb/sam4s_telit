@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "paths.h": "c",
+        "termios.h": "c",
+        "ttydefaults.h": "c",
+        "usart.h": "c",
+        "cph.h": "c",
+        "filio.h": "c"
+    }
+}

@@ -113,15 +113,19 @@ uint8_t scratch_buffer[SCRATCH_BUFFER_LEN];
 #define MODEM_CMD_HTTPSOCKETGET		"GET / HTTP/1.1\r\nHost: www.google.com\r\nConnection: keep-alive\r\n\r\n"
 
 
-typedef void (*modem_func_t) (void);
 
-typedef struct
-{
-	modem_func_t fnc_handler;
-	uint32_t timeout;
-	uint8_t retries;
-	bool waitingreply;
-} at_cmd_t;
+
+// typedef struct
+// {
+// 	modem_func_t fnc_handler;
+// 	uint32_t timeout;
+// 	uint8_t retries;
+// 	bool waitingreply;
+// } at_cmd_t;
+
+
+
+
 
 
 

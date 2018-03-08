@@ -28,6 +28,18 @@ typedef enum{
     SYS_MODEM_FAIL
 } sys_result;
 
+typedef void (*modem_func_t) (void);
+
+typedef struct
+{
+	modem_func_t fnc_handler;
+	uint32_t timeout;
+	uint8_t retries;
+	bool waitresp;
+	sys_result result;
+} at_cmd_t;
+
+
 sys_result modem_init(void);
 
 void modem_set_ondatareceive_func(modem_ondatareceive_func_t fnc);
@@ -35,10 +47,15 @@ void modem_set_ondatareceive_func(modem_ondatareceive_func_t fnc);
 void modem_tick(void);
 void modem_write(char *cmd);
 void modem_close(void);
+sys_result modem_data_handler(char *data);
 
 
 uint8_t modem_data_available(void);
 uint8_t modem_data_read(void);
+
+
+
+
 
 
 

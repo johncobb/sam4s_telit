@@ -3,6 +3,7 @@
 
 
 #include "modem.h"
+#include "modem_config.h"
 
 // NO DIALTONE
 // BUSY
@@ -40,7 +41,27 @@ void modem_loop(void)
     }
 }
 
+void config_loop(void)
+{
+    modem_init();
+    modem_config_init();
+
+    while (true) {
+        modem_tick();
+        if (modem_config_tick() == CFG_COMPLETE){
+            break;
+        }
+        // _cph_delay_ms(10);
+    }
+}
+
 int main(void)
 {
-    modem_loop();
+    // modem_loop();
+    config_loop();
+
+    while(true) {
+        printf("just hanging out in the loop\r\n");
+        _cph_delay_ms(1000);
+    }
 }

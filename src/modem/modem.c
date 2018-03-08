@@ -136,6 +136,21 @@ void modem_write(char *cmd)
     usart_tx(cmd, len);   
 }
 
+sys_result modem_data_handler(char *data){
+
+    char *ptr = NULL;
+
+    if ((ptr = strstr(data, "OK"))) {
+        return SYS_AT_OK;
+    } else if ((ptr = strstr(data, "ERROR"))) {
+        return SYS_MODEM_ERROR;
+    } else if ((ptr = strstr(data, "NO CARRIER"))) {
+        return SYS_MODEM_NOCARRIER;
+    } else {
+        return SYS_OK;
+    }
+}
+
 
 // sys_result handle_result(char *token, char **ptr_out)
 // {

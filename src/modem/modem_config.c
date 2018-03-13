@@ -14,8 +14,11 @@ at_cmd_t at_cfg_commands[] = {
     {modem_setpassword,  	    1000, 0, false, SYS_OK},
     {modem_setguardtime, 	    1000, 0, false, SYS_OK},
     {modem_skipesc, 		    1000, 0, false, SYS_OK},
-    {modem_socketconfig, 	    1000, 0, false, SYS_OK},
+    // {modem_socketconfig, 	    1000, 0, false, SYS_OK},
     {modem_mobileequiperr,      1000, 0, false, SYS_OK},
+    // {modem_firewallcfg,         1000, 0, false, SYS_OK},
+    {modem_activatecontext,      1000, 0, false, SYS_OK},
+    // {modem_socketlisten,        1000, 0, false, SYS_OK},
     {NULL, 0, 0, NULL}
 };
 
@@ -61,11 +64,11 @@ modem_cfg_state_t modem_config_tick(void)
                 if (at_cmd->result == SYS_AT_OK) {
                     // printf("next command\r\n");
                     printf("OK\r\n");
-                    /* Moving on to next function*/
+                    /* moving on to next function */
                     _config_index++;
                     return CFG_INPROC;
                 } else {
-                    /* WTF went wrong? */
+                    /* wtf went wrong? */
                     return CFG_ERROR;
                 }
             } else {

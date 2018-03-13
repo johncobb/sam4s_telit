@@ -4,6 +4,7 @@
 #include <cph.h>
 #include "usart.h"
 #include "modem_defs.h"
+#include "telit.h"
 
 #define MODEM_RX_BUFFER_SIZE    128
 #define MODEM_BAUD_RATE         115200
@@ -22,6 +23,7 @@ typedef struct{
 typedef enum{
     SYS_OK = 0,
     SYS_AT_OK,
+    SYS_AT_CONNECT,
     SYS_MODEM_TIMEOUT,
     SYS_MODEM_NOCARRIER,
     SYS_MODEM_ERROR,

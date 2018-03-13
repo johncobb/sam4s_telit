@@ -142,7 +142,10 @@ sys_result modem_data_handler(char *data){
 
     if ((ptr = strstr(data, "OK"))) {
         return SYS_AT_OK;
+    } else if ((ptr = strstr(data, "CONNECT"))) {
+        return SYS_AT_CONNECT;
     } else if ((ptr = strstr(data, "ERROR"))) {
+        printf("error: %s\r\n", data);
         return SYS_MODEM_ERROR;
     } else if ((ptr = strstr(data, "NO CARRIER"))) {
         return SYS_MODEM_NOCARRIER;

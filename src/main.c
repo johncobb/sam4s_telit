@@ -23,6 +23,11 @@ void ondatareceive_func(char *data)
     printf("modem_rx_func: %s\r\n", data);
 }
 
+void onsocketdatareceive_func(uint8_t *data, uint32_t len)
+{
+    printf("onsocketdatareceive_func: \r\n");
+}
+
 socket_t _listener;
 
 void socket_init_loop(void)
@@ -56,7 +61,8 @@ void socket_init_loop(void)
         .state = 0,
         .substate = 0,
         .timeout = 0,
-        .event = ondatareceive_func
+        .event = ondatareceive_func,
+        .on_datareceive = onsocketdatareceive_func
     };
 
     /*

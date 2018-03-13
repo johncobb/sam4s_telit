@@ -70,7 +70,7 @@ void log_socket_settings(socket_t *socket)
     printf(" - tx_to: %d\r\n", socket->socket_config->tx_to);
     if (socket->firewall != NULL) {
         printf("*** socket firewall ***:\r\n");
-        printf(" - action: %d (0:add 1:remove 2:drop)\r\n", socket->firewall->action);
+        printf(" - action: %d (0:remove 1:accept 2:drop)\r\n", socket->firewall->action);
         printf(" - ip_address: %s\r\n", socket->firewall->ip_address);
         printf(" - net_mask: %s\r\n", socket->firewall->net_mask);
     }    
@@ -82,7 +82,7 @@ void log_socket_settings(socket_t *socket)
 uint8_t socket_free()
 {
     /* Sanity check... yep your crazy */
-    if(--_socket_pool_index == -1) {
+    if(_socket_pool_index-- == -1) {
 		_socket_pool_index = 0;
 		return 0;
     }

@@ -26,13 +26,13 @@ typedef enum {
 
 typedef void (*socket_connect_func_t)(void);
 typedef void (*socket_ondisconnect_func_t)(void);
-typedef void (*socket_onreceive_func_t)(uint8_t *data, uint32_t len);
+typedef void (*socket_ondatareceive_func_t)(uint8_t *data, uint32_t len);
 
 typedef struct
 {
 	socket_connect_func_t on_connect;
 	socket_ondisconnect_func_t on_disconnect;
-	socket_onreceive_func_t on_datareceive;
+	socket_ondatareceive_func_t on_datareceive;
 
 }socket_event_handler_t;
 
@@ -44,6 +44,7 @@ typedef struct {
     socket_substate_t substate;
     uint32_t timeout;
     modem_ondatareceive_func_t event;
+    socket_ondatareceive_func_t on_datareceive;
 } socket_t;
 
 extern socket_t *socket_pool[SOCKET_POOL_LEN];

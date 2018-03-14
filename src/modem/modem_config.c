@@ -25,11 +25,13 @@ at_cmd_t at_cfg_commands[] = {
 uint8_t _config_index = 0;
 at_cmd_t *at_cmd;
 
-void modem_cfg_ondatareceive_func(char *data)
+void modem_cfg_ondatareceive_func(uint8_t *buffer, uint32_t len)
 {
-    // printf("modem_config.ondatareceive_func: %s\r\n", data);
+    #ifdef LOG_MODEM_ONDATARECEIVE
+    printf("modem_cfg_ondatareceive_func: bytes: %d buffer: %s\r\n", len, buffer);
+    #endif
 
-    at_cmd->result = modem_data_handler(data);
+    at_cmd->result = modem_data_handler(buffer, len);
 }
 
 void modem_config_init()

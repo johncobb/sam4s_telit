@@ -6,11 +6,15 @@
 #include "modem_defs.h"
 #include "telit.h"
 
+// #ifndef LOG_MODEM_ONDATARECEIVE
+// #define LOG_MODEM_ONDATARECEIVE
+// #endif
+
 #define MODEM_RX_BUFFER_SIZE    128
 #define MODEM_BAUD_RATE         115200
 #define TOKEN_END '\n'
 
-typedef void (*modem_ondatareceive_func_t)(char *);
+typedef void (*modem_ondatareceive_func_t)(uint8_t *buffer, uint32_t len);
 typedef void (*modem_connect_func_t)(void);
 typedef void (*modem_ondisconnect_func_t)(void);
 
@@ -49,7 +53,9 @@ void modem_set_ondatareceive_func(modem_ondatareceive_func_t fnc);
 void modem_tick(void);
 void modem_write(char *cmd);
 void modem_close(void);
-sys_result modem_data_handler(char *data);
+// sys_result modem_data_handler(char *data);
+
+sys_result modem_data_handler(uint8_t *buffer, uint32_t len);
 
 
 uint8_t modem_data_available(void);

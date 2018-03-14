@@ -1,10 +1,10 @@
 
 #include <cph.h>
 
-
 #include "modem.h"
 #include "modem_config.h"
 #include "socket.h"
+#include "cph_clock.h"
 
 // NO DIALTONE
 // BUSY
@@ -12,15 +12,11 @@
 // CONNECT
 // CONNECT 115200
 
-extern void _cph_delay_ms(uint32_t millis)
+void ondatareceive_func(uint8_t *buffer, uint32_t len)
 {
-    // millis * micros
-    usleep(millis*1000);
-}
-
-void ondatareceive_func(char *data)
-{
-    printf("modem_rx_func: %s\r\n", data);
+    #ifdef LOG_MODEM_ONDATARECEIVE
+    printf("ondatareceive_func: bytes: %d buffer: %s\r\n", len, buffer);
+    #endif
 }
 
 void onsocketdatareceive_func(uint8_t *data, uint32_t len)
@@ -110,9 +106,19 @@ void config_loop(void)
     }
 }
 
+void clock_loop(void)
+{
+    while (true) {
+        printf("_cph_get_millis: %d\r\n", _cph_get_millis());
+        _cph_delay_ms(500);
+    }
+}
+
 int main(void)
 {
-    socket_init_loop();
+
+    clock_loop();
+    // socket_init_loop();
     // modem_loop();
     // config_loop();
 

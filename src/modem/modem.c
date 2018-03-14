@@ -67,7 +67,7 @@ void modem_handle_data(void)
 
         if (c == ((uint8_t)TOKEN_END)) {
 
-            modem_evt.on_datareceive(buffer);
+            modem_evt.on_datareceive(buffer, (i+1));
         }
     }
 
@@ -136,23 +136,41 @@ void modem_write(char *cmd)
     usart_tx(cmd, len);   
 }
 
-sys_result modem_data_handler(char *data){
+sys_result modem_data_handler(uint8_t *buffer, uint32_t len) {
 
     char *ptr = NULL;
 
-    if ((ptr = strstr(data, "OK"))) {
+    if ((ptr = strstr(buffer, "OK"))) {
         return SYS_AT_OK;
-    } else if ((ptr = strstr(data, "CONNECT"))) {
+    } else if ((ptr = strstr(buffer, "CONNECT"))) {
         return SYS_AT_CONNECT;
-    } else if ((ptr = strstr(data, "ERROR"))) {
-        printf("error: %s\r\n", data);
+    } else if ((ptr = strstr(buffer, "ERROR"))) {
+        printf("error: %s\r\n", buffer);
         return SYS_MODEM_ERROR;
-    } else if ((ptr = strstr(data, "NO CARRIER"))) {
+    } else if ((ptr = strstr(buffer, "NO CARRIER"))) {
         return SYS_MODEM_NOCARRIER;
     } else {
         return SYS_OK;
     }
 }
+
+// sys_result modem_data_handler(char *data){
+
+//     char *ptr = NULL;
+
+//     if ((ptr = strstr(data, "OK"))) {
+//         return SYS_AT_OK;
+//     } else if ((ptr = strstr(data, "CONNECT"))) {
+//         return SYS_AT_CONNECT;
+//     } else if ((ptr = strstr(data, "ERROR"))) {
+//         printf("error: %s\r\n", data);
+//         return SYS_MODEM_ERROR;
+//     } else if ((ptr = strstr(data, "NO CARRIER"))) {
+//         return SYS_MODEM_NOCARRIER;
+//     } else {
+//         return SYS_OK;
+//     }
+// }
 
 
 // sys_result handle_result(char *token, char **ptr_out)

@@ -15,11 +15,13 @@ at_cmd_t *at_cmd;
 
 sys_result socket_result = SYS_OK;
 
-void modem_sck_ondatareceive_func(char *data)
+void modem_sck_ondatareceive_func(uint32_t *buffer, uint32_t len)
 {
-    // printf("modem_config.ondatareceive_func: %s\r\n", data);
+    #ifdef LOG_MODEM_ONDATARECEIVE
+    printf("modem_socket.modem_sck_ondatareceive_func: len:%d buffer: %s\r\n", len, buffer);
+    #endif
 
-    socket_result = modem_data_handler(data);
+    socket_result = modem_data_handler(buffer, len);
 }
 
 

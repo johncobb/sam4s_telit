@@ -5,6 +5,7 @@
         "ttydefaults.h": "c",
         "usart.h": "c",
         "cph.h": "c",
-        "filio.h": "c"
+        "filio.h": "c",
+        "socket.h": "c"
     }
 }

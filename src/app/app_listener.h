@@ -4,6 +4,10 @@
 #include <cph.h>
 #include "modem.h"
 
+#ifndef LOG_APP_LISTENER_VERBOSE
+#define LOG_APP_LISTENER_VERBOSE
+#endif
+
 typedef enum {
     APP_INPROC = 0,
     APP_TIMEOUT,

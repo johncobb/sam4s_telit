@@ -12,6 +12,7 @@ void _cph_delay_ms(uint32_t millis)
  * Time:
  * https://stackoverflow.com/questions/3756323/how-to-get-the-current-time-in-milliseconds-from-c-in-linux
  * https://gist.github.com/jbenet/1087739
+ * http://www.raspberry-projects.com/pi/programming-in-c/timing/clock_gettime-for-acurate-timing
  */
 void current_utc_time(struct timespec *ts)
 {

@@ -158,4 +158,19 @@ void modem_socketsend(char *cmd)
 	modem_write(cmd);
 }
 
+void modem_socketstatus(modem_socket_t socket)
+{
+	/* "AT#SS\r" */
+	modem_write(MODEM_CMD_SOCKETSTATUS);
+}
+
+void modem_socketaccept(modem_socket_t socket)
+{
+	/* "AT#SA=1\r" */
+	char buffer[128] = {0};
+
+	sprintf(buffer, MODEM_CMD_SOCKETACCEPT, socket.connection_id);
+	modem_write(buffer);
+}
+
 

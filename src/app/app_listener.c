@@ -1,7 +1,7 @@
 #include "modem_defs.h"
 #include "modem.h"
 #include "telit.h"
-#include "modem_socket.h"
+#include "app_listener.h"
 
 // at_cmd_t at_sck_commands[] = {
 //     // fnc_handler, timeout, retries, waitingreply
@@ -15,16 +15,32 @@ at_cmd_t *at_cmd;
 
 sys_result socket_result = SYS_OK;
 
-void modem_sck_ondatareceive_func(uint32_t *buffer, uint32_t len)
+
+
+typedef struct
 {
+    uint8_t *buffer;
+    uint32_t len;
+} app_listener_data_t;
+
+app_listener_data_t _listener_data;
+
+void listener_reset_buffer(void)
+{
+    _listener_data.buffer = NULL;
+    _listener_data.len = 0;
+}
+
+void app_listener_ondatareceive_func(uint32_t *buffer, uint32_t len)
+{
+    memcpy(_listener_data.buffer, buffer, len);
+
     #ifdef LOG_MODEM_ONDATARECEIVE
-    printf("modem_socket.modem_sck_ondatareceive_func: len:%d buffer: %s\r\n", len, buffer);
+    printf("app_listener.app_listener_ondatareceive_func: len:%d buffer: %s\r\n", len, buffer);
     #endif
 
     socket_result = modem_data_handler(buffer, len);
 }
-
-
 
  socket_config_t socket_config = {
      .connection_id = 1,
@@ -40,12 +56,14 @@ void modem_sck_ondatareceive_func(uint32_t *buffer, uint32_t len)
  * Second set firewall entries that are required for listening
  * Third open the configured connection
  */
-void modem_socket_init(void)
+app_listener_init_status_t app_listener_init(void)
 {
+
+    app_listener_init_status_t init_result = APP_LISTENER_INIT_SUCCESS;
 
     /* Setup modem callback handler */
     at_cmd = NULL;
-    modem_set_ondatareceive_func(modem_sck_ondatareceive_func);
+    modem_set_ondatareceive_func(app_listener_ondatareceive_func);
 
     /* Setup socket configuration: */
     modem_socketconfig(socket_config);
@@ -57,6 +75,9 @@ void modem_socket_init(void)
             if (socket_result == SYS_AT_OK) {
                 socket_result = SYS_OK; // reset result
                 break;
+            } else if (socket_result == SYS_MODEM_ERROR) {
+                init_result = APP_LISTENER_INIT_FAILED;
+                printf("error configuring socket\r\n");
             }
         }  
     }
@@ -70,7 +91,7 @@ void modem_socket_init(void)
 
     modem_firewallcfg(entry);
 
-        while(true) {
+    while(true) {
         modem_tick();
 
         if (socket_result > SYS_OK) {
@@ -79,14 +100,17 @@ void modem_socket_init(void)
                 break;
             } else if (socket_result == SYS_MODEM_ERROR) {
                 printf("error configuring firewall\r\n");
+                init_result = APP_LISTENER_INIT_FAILED;
                 break;
             }
         }  
     }
 
+    return init_result;
+
 }
 
-void modem_socket_listen_run(void)
+void app_listener_run(void)
 {
     /* Configure socket connection */
     modem_socket_t socket;
@@ -99,20 +123,23 @@ void modem_socket_listen_run(void)
     modem_socketlisten(socket);
 }
 
-void modem_socket_open_run(void)
+// void app_open_run(void)
+// {
+//     /* Configure socket connection */
+//     modem_socket_t socket;
+
+//     socket.connection_id = 1;
+//     socket.protocol = UDP;
+//     socket.port = 1337;
+//     socket.address = "bs.cphandheld.com";
+
+//     modem_socketopen(socket);
+// }
+
+app_socket_state_t app_listener_tick(void)
 {
-    /* Configure socket connection */
-    modem_socket_t socket;
-
-    socket.connection_id = 1;
-    socket.protocol = UDP;
-    socket.port = 1337;
-    socket.address = "bs.cphandheld.com";
-
-    modem_socketopen(socket);
-}
-
-modem_sck_state_t modem_socket_tick(void)
-{
-    return SCK_INPROC;
+    if (_listener_data.len > 0) {
+        printf("_listener_data: %s\r\n", _listener_data.buffer);
+    }
+    return APP_INPROC;
 }

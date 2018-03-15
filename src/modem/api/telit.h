@@ -74,6 +74,8 @@ void modem_socketclose(modem_socket_t socket);
 void modem_socketresume(modem_socket_t socket);
 void modem_socketsuspend(void);
 void modem_socketsend(char * cmd);
+void modem_socketstatus(modem_socket_t socket);
+void modem_socketaccept(modem_socket_t socket);
 
 
 #endif

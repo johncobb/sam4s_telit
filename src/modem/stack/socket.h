@@ -5,6 +5,7 @@
 
 #define SOCKET_POOL_LEN     6
 
+
 typedef enum {
     SCK_SUCCESS = 0,
     SCK_ERR_MAX_POOL
@@ -47,7 +48,7 @@ typedef struct {
     socket_ondatareceive_func_t on_datareceive;
 } socket_t;
 
-extern socket_t *socket_pool[SOCKET_POOL_LEN];
+extern socket_t *socket_pool[SOCKET_POOL_LEN]; /* used to allocate sockets from modem */
 
 socket_status_t socket_new(socket_t *socket);
 socket_state_t socket_init(socket_t *socket);

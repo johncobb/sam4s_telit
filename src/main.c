@@ -5,6 +5,7 @@
 #include "modem_config.h"
 #include "socket.h"
 #include "cph_clock.h"
+#include "app_listener.h"
 
 // NO DIALTONE
 // BUSY
@@ -117,7 +118,17 @@ void clock_loop(void)
 int main(void)
 {
 
-    clock_loop();
+    /* Configure the modem */
+    config_loop();
+
+    if (app_listener_init() == APP_LISTENER_INIT_SUCCESS) {
+        while (true) {
+            /* Call the tick of our app listener */
+            app_listener_tick();
+        }
+    }
+
+    // clock_loop();
     // socket_init_loop();
     // modem_loop();
     // config_loop();

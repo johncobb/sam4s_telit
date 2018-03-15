@@ -123,14 +123,3 @@ socket_state_t socket_tick(socket_t *socket)
 
     return SCK_INIT;
 }
-
-// void sck_ondatareceive_func(char *data)
-// {
-//     printf("socket.sck_ondatareceive_func: %s\r\n", data);
-// }
-
-// socket_state_t socket_init(socket_t *socket)
-// {
-//     modem_set_ondatareceive_func(sck_ondatareceive_func);
-//     return SCK_CONFIG;
-// }

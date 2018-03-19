@@ -9,7 +9,7 @@
 
 serial_rx_cb_t serial_rx_cb;
 
-char serial_buffer[20] = {0};
+char serial_buffer[SERIAL_BUFFER_LEN] = {0};
 int file_desc;
 
 // Hold original terminal attributes
@@ -34,7 +34,7 @@ void serial_set_callback(serial_rx_cb_t cb)
 int serial_port_init(char *io_path)
 {
 
-    memset(serial_buffer, 0, 20);
+    memset(serial_buffer, 0, SERIAL_BUFFER_LEN);
     // http://www.cmrr.umn.edu/~strupp/serial.html#3_1_5
     int handshake;
     struct termios options;
@@ -98,7 +98,7 @@ void serial_port_tick(void)
 {
 
     // serial_rx_cb('h');
-    int bytes = read(file_desc, serial_buffer, 20);
+    int bytes = read(file_desc, serial_buffer, SERIAL_BUFFER_LEN);
 
     if (bytes > 0) {
         for(int i=0; i<bytes; i++) {

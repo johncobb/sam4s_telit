@@ -50,6 +50,14 @@ void modem_tick(void)
     modem_handle_data();
 }
 
+/*
+ * modem responseses are wrapped between
+ * two CR LF characters. The following
+ * function reads the modem resposne and invokes
+ * the on_datareceive method when a response is found.
+ * Example: "\r\nOK\r\n"
+ */
+uint8_t token_count = 0;
 void modem_handle_data(void)
 {
     char buffer[MODEM_RX_BUFFER_SIZE] = {0};
@@ -59,15 +67,18 @@ void modem_handle_data(void)
     // printf("modem_data_buffer: ");
     for (int i=0; i<bytes; i++) {
 
-        
         uint8_t c = modem_data_read();
-        // printf("%c", c);
-        // modem_buffer[modem_buffer_index++] = c;
+
         buffer[i] = c;
 
         if (c == ((uint8_t)TOKEN_END)) {
+            if (++token_count == 2) {
+                token_count = 0;
+                modem_evt.on_datareceive(buffer, (i+1));
+                break;
+            }
 
-            modem_evt.on_datareceive(buffer, (i+1));
+
         }
     }
 

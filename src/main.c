@@ -95,7 +95,7 @@ void modem_loop(void)
 
 void config_loop(void)
 {
-    modem_init();
+    // modem_init();
     modem_config_init();
 
     while (true) {
@@ -118,8 +118,12 @@ void clock_loop(void)
 int main(void)
 {
 
+    modem_init();
+
     /* Configure the modem */
-    config_loop();
+    // config_loop();
+
+    
 
     if (app_listener_init() == APP_LISTENER_INIT_SUCCESS) {
         while (true) {

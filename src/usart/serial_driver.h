@@ -10,6 +10,8 @@
 #include <errno.h>   /* Error number definitions */
 #include <termios.h> /* POSIX terminal control definitions */
 
+#define SERIAL_BUFFER_LEN   128
+
 #define SERIAL_IO_PATH               "/dev/tty.usbserial-FTVTIU6Z"
 
 typedef void (*serial_rx_cb_t)(uint8_t);

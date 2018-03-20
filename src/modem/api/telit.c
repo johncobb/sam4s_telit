@@ -19,7 +19,7 @@ void modem_setinterface(void)
 
 void modem_setmsgformat(void)
 {
-	modem_write(MODEM_CMD_SELINT);
+	modem_write(MODEM_CMD_MSGFMT);
 }
 
 void modem_setband(void)

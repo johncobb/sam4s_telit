@@ -6,6 +6,11 @@
 #include <termios.h> /* POSIX terminal control definitions */
 #include "serial_driver.h"
 
+#if defined(__arm__)
+static const char _tag[] PROGMEM = "serial_driver: "; /* used in embedded gcc */
+#else
+static const char _tag[] = "serial_driver: ";
+#endif
 
 serial_rx_cb_t serial_rx_cb;
 
@@ -17,7 +22,7 @@ static struct termios original_tty_attrs;
 
 void serial_set_callback(serial_rx_cb_t cb)
 {
-    printf("serial_set_callback: \r\n");
+    LOG("serial_set_callback: \r\n");
     serial_rx_cb = cb;
 }
 
@@ -40,14 +45,14 @@ int serial_port_init(char *io_path)
     struct termios options;
 
     file_desc = open(io_path, O_RDWR | O_NOCTTY | O_NDELAY);
-    printf("io_path: %s\r\n", io_path);
-    // printf("file_desc: %d\r\n", file_desc);
+    LOG("io_path: %s\r\n", io_path);
+    LOG("file_desc: %d\r\n", file_desc);
 
     if (file_desc == -1) {
-        printf("error opening port\r\n");
+        LOG("error opening port\r\n");
         return -1;
     } else {
-        printf("open_serial_port: successful\r\n");
+        LOG("open_serial_port: successful\r\n");
     }
 
     // Now that the device is open, clear the O_NONBLOCK flag so subsequent I/O will block.
@@ -55,7 +60,7 @@ int serial_port_init(char *io_path)
 
     // Get the current options and save them so we can restore the default settings later.
     if (tcgetattr(file_desc, &original_tty_attrs) == -1) {
-        printf("Error getting tty attributes %s - %s(%d).\n", io_path, strerror(errno), errno);
+        LOG("Error getting tty attributes %s - %s(%d).\n", io_path, strerror(errno), errno);
     }
 
     options = original_tty_attrs;
@@ -65,8 +70,8 @@ int serial_port_init(char *io_path)
     cfsetospeed(&options, B115200);
 
     // Print the current input and output baud rates.
-    printf("input_baud_rate: %d\r\n", (int) cfgetispeed(&options));
-    printf("output_baud_rate: %d\r\n", (int) cfgetospeed(&options));
+    LOG("input_baud_rate: %d\r\n", (int) cfgetispeed(&options));
+    LOG("output_baud_rate: %d\r\n", (int) cfgetospeed(&options));
 
     // Enable receiver and set local mode
     options.c_cflag |= (CLOCAL | CREAD);
@@ -75,7 +80,7 @@ int serial_port_init(char *io_path)
     options.c_cc[VMIN] = 0;
     options.c_cc[VTIME] = 10; // 1 second read timeout
 
-    printf("echo_flag: %lu\r\n", options.c_lflag );
+    LOG("echo_flag: %lu\r\n", options.c_lflag );
 
     options.c_cflag &= ~CRTSCTS;
     options.c_cflag &= ~CSIZE; /* Mask the character size bits */
@@ -91,13 +96,12 @@ int serial_port_init(char *io_path)
 
 void serial_port_close(void)
 {
+    LOG("serial_port_close: file_desc: %d\r\n", file_desc);
     close(file_desc);
 }
 
 void serial_port_tick(void)
 {
-
-    // serial_rx_cb('h');
     int bytes = read(file_desc, serial_buffer, SERIAL_BUFFER_LEN);
 
     if (bytes > 0) {
@@ -109,15 +113,14 @@ void serial_port_tick(void)
 
 void serial_port_write(char *buffer, uint8_t len)
 {
-    // printf("file_desc: %d\r\n", file_desc);
-    printf("serial_port_write: %s\r\n", buffer);
+    LOGT("serial_port_write: %s\r\n", buffer);
     write(file_desc, buffer, len);
 }
 
 void serial_port_read(char *buffer, uint8_t len)
 {
-    // printf("file_desc: %d\r\n", file_desc);
+    LOGT("file_desc: %d\r\n", file_desc);
     int bytes = read(file_desc, serial_buffer, len);
-    printf("serial_port_read: bytes: %d buffer: %s\r\n", bytes, serial_buffer);
+    LOGT("serial_port_read: bytes: %d buffer: %s\r\n", bytes, serial_buffer);
 
 }

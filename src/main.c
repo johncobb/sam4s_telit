@@ -7,22 +7,22 @@
 #include "cph_clock.h"
 #include "app_listener.h"
 
-// NO DIALTONE
-// BUSY
-// NO CARRIER
-// CONNECT
-// CONNECT 115200
+
+#if defined(__arm__)
+static const char _tag[] PROGMEM = "main: "; /* used in embedded gcc */
+#else
+static const char _tag[] = "main: ";
+#endif
+
 
 void ondatareceive_func(uint8_t *buffer, uint32_t len)
 {
-    #ifdef LOG_MODEM_ONDATARECEIVE
-    printf("ondatareceive_func: bytes: %d buffer: %s\r\n", len, buffer);
-    #endif
+    LOGT("ondatareceive_func: bytes: %d buffer: %s\r\n", len, buffer);
 }
 
 void onsocketdatareceive_func(uint8_t *data, uint32_t len)
 {
-    printf("onsocketdatareceive_func: \r\n");
+    LOGT("onsocketdatareceive_func: \r\n");
 }
 
 socket_t _listener;
@@ -110,7 +110,7 @@ void config_loop(void)
 void clock_loop(void)
 {
     while (true) {
-        printf("_cph_get_millis: %d\r\n", _cph_get_millis());
+        LOG("_cph_get_millis: %d\r\n", _cph_get_millis());
         _cph_delay_ms(500);
     }
 }
@@ -118,7 +118,13 @@ void clock_loop(void)
 int main(void)
 {
 
+    LOG("platform: %s\r\n", PLATFORM);
+    LOGT("log trace: enabled\r\n");
+    LOGE("log error: enabled\r\n");
+    LOG("log event_list: size %d\r\n", modem_get_eventlist_size());
     modem_init();
+
+
 
     /* Configure the modem */
     // config_loop();
@@ -138,7 +144,7 @@ int main(void)
     // config_loop();
 
     while(true) {
-        printf("just hanging out in the loop\r\n");
+        LOG("just hanging out in the loop\r\n");
         _cph_delay_ms(1000);
     }
 }

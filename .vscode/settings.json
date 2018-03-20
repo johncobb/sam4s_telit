@@ -6,6 +6,8 @@
         "usart.h": "c",
         "cph.h": "c",
         "filio.h": "c",
-        "socket.h": "c"
+        "socket.h": "c",
+        "param.h": "c",
+        "log.h": "c"
     }
 }

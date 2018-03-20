@@ -1,24 +1,29 @@
+#include <cph.h>
 #include "modem_defs.h"
 #include "modem.h"
 #include "telit.h"
 #include "modem_config.h"
 
+
+#if defined(__arm__)
+static const char _tag[] PROGMEM = "modem_config: "; /* used in embedded gcc */
+#else
+static const char _tag[] = "modem_config: ";
+#endif
+
 at_cmd_t at_cfg_commands[] = {
     // fnc_handler, timeout, retries, waitingreply
-    {modem_factory,  		    1000, 0, false, SYS_OK},
-    {modem_echooff,   		    1000, 0, false, SYS_OK},
-    {modem_setinterface,  	    1000, 0, false, SYS_OK},
-    {modem_setmsgformat,  	    1000, 0, false, SYS_OK},
-    {modem_setcontext,   	    1000, 0, false, SYS_OK},
-    {modem_setuserid,   	    1000, 0, false, SYS_OK},
-    {modem_setpassword,  	    1000, 0, false, SYS_OK},
-    {modem_setguardtime, 	    1000, 0, false, SYS_OK},
-    {modem_skipesc, 		    1000, 0, false, SYS_OK},
-    // {modem_socketconfig, 	    1000, 0, false, SYS_OK},
-    {modem_mobileequiperr,      1000, 0, false, SYS_OK},
-    // {modem_firewallcfg,         1000, 0, false, SYS_OK},
-    {modem_activatecontext,      1000, 0, false, SYS_OK},
-    // {modem_socketlisten,        1000, 0, false, SYS_OK},
+    {modem_factory,  		    1000, 0, false, EVT_OK},
+    {modem_echooff,   		    1000, 0, false, EVT_OK},
+    {modem_setinterface,  	    1000, 0, false, EVT_OK},
+    {modem_setmsgformat,  	    1000, 0, false, EVT_OK},
+    {modem_setcontext,   	    1000, 0, false, EVT_OK},
+    {modem_setuserid,   	    1000, 0, false, EVT_OK},
+    {modem_setpassword,  	    1000, 0, false, EVT_OK},
+    {modem_setguardtime, 	    1000, 0, false, EVT_OK},
+    {modem_skipesc, 		    1000, 0, false, EVT_OK},
+    {modem_mobileequiperr,      1000, 0, false, EVT_OK},
+    {modem_activatecontext,      1000, 0, false, EVT_OK},
     {NULL, 0, 0, NULL}
 };
 
@@ -27,17 +32,28 @@ at_cmd_t *at_cmd;
 
 void modem_cfg_ondatareceive_func(uint8_t *buffer, uint32_t len)
 {
-    #ifdef LOG_MODEM_ONDATARECEIVE
-    printf("modem_cfg_ondatareceive_func: bytes: %d buffer: %s\r\n", len, buffer);
-    #endif
+    LOGT("modem_cfg_ondatareceive_func: bytes: %d buffer: %s\r\n", len, buffer);
+}
 
-    at_cmd->result = modem_data_handler(buffer, len);
+void modem_cfg_oneventreceive_func(uint8_t *buffer, uint32_t len)
+{
+    LOGT("modem_cfg_oneventreceive_func: bytes: %d buffer: %s\r\n", len, buffer);
+    at_cmd->result = modem_identify_event(buffer);
 }
 
 void modem_config_init()
 {
     at_cmd = NULL;
+    /*
+     * modem event handler for receiving bulk data from servers.
+     */
     modem_set_ondatareceive_func(modem_cfg_ondatareceive_func);
+    
+    /*
+     * modem event handler for receiving modem events
+     * Example: \r\nOK\r\n \r\nCONNECT\r\n
+     */
+    modem_set_ondatareceive_func(modem_cfg_oneventreceive_func);
 }
 
 modem_cfg_state_t modem_config_tick(void)
@@ -63,9 +79,9 @@ modem_cfg_state_t modem_config_tick(void)
                 /*
                  * Everything went as expected...  proceed
                  */
-                if (at_cmd->result == SYS_AT_OK) {
-                    // printf("next command\r\n");
-                    printf("OK\r\n");
+                if (at_cmd->result == EVT_OK) {
+
+                    LOG("OK\r\n");
                     /* moving on to next function */
                     _config_index++;
                     return CFG_INPROC;

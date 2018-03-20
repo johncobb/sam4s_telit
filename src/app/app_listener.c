@@ -1,14 +1,13 @@
 #include "modem_defs.h"
 #include "modem.h"
 #include "telit.h"
-#include "log.h"
 #include "app_listener.h"
 
 
-#ifdef __APPLE__
-static const char _tag[] = "app_listener: ";
+#if defined(__arm__)
+static const char _tag[] PROGMEM = "app_listener: "; /* used in embedded gcc */
 #else
-static const char _tag[] PROGMEM = "main: "; /* used in embedded gcc */
+static const char _tag[] = "app_listener: ";
 #endif
 // at_cmd_t at_sck_commands[] = {
 //     // fnc_handler, timeout, retries, waitingreply
@@ -20,7 +19,9 @@ static const char _tag[] PROGMEM = "main: "; /* used in embedded gcc */
 // uint8_t _sck_index = 0;
 at_cmd_t *at_cmd;
 
-sys_result socket_result = SYS_OK;
+// sys_result socket_result = SYS_OK;
+
+modem_event_t socket_event = EVT_OK;
 
 typedef struct
 {
@@ -36,12 +37,24 @@ void listener_reset_buffer(void)
     _listener_data.len = 0;
 }
 
+/*
+ * modem event handler for receiving bulk data from servers.
+ */
 void app_listener_ondatareceive_func(uint8_t *buffer, uint32_t len)
 {
-    LOG("app_listener_ondatareceive_func: len:%d buffer: %s\r\n", len, buffer);
-    // memcpy(_listener_data.buffer, buffer, len);
+    LOG("app_listener_ondatareceive_func: event_id: %d len:%d buffer: %s\r\n", socket_event, len, buffer);
+}
 
-    socket_result = modem_data_handler(buffer, len);
+/*
+ * modem event handler for receiving modem events
+ * Example: \r\nOK\r\n \r\nCONNECT\r\n
+ */
+void app_listener_oneventreceive_func(uint8_t *buffer, uint32_t len)
+{
+    socket_event = modem_identify_event(buffer);
+
+    LOG("app_listener_ondatareceive_func: event_id: %d len:%d buffer: %s\r\n", socket_event, len, buffer);
+
 }
 
  socket_config_t socket_config = {
@@ -66,8 +79,13 @@ app_listener_init_status_t app_listener_init(void)
 
     /* Setup modem callback handler */
     at_cmd = NULL;
+    
+
     LOG("app_modem_set_ondatareceive_func: \r\n");
     modem_set_ondatareceive_func(app_listener_ondatareceive_func);
+
+    LOG("app_listener_oneventreceive_func: \r\n");
+    modem_set_oneventreceive_func(app_listener_oneventreceive_func);
 
     /* Setup socket configuration: */
     LOG("modem_socketconfig: \r\n");
@@ -76,11 +94,12 @@ app_listener_init_status_t app_listener_init(void)
     while(true) {
         modem_tick();
 
-        if (socket_result > SYS_OK) {
-            if (socket_result == SYS_AT_OK) {
-                socket_result = SYS_OK; // reset result
+        if (socket_event > EVT_WAITING) {
+            if (socket_event == EVT_OK) {
+                /* reset to EVT_WAITING for next pass */
+                socket_event = EVT_WAITING; 
                 break;
-            } else if (socket_result == SYS_MODEM_ERROR) {
+            } else if (socket_event == EVT_ERROR) {
                 init_result = APP_LISTENER_INIT_FAILED;
                 LOG("error configuring socket\r\n");
             }
@@ -99,11 +118,12 @@ app_listener_init_status_t app_listener_init(void)
     while(true) {
         modem_tick();
 
-        if (socket_result > SYS_OK) {
-            if (socket_result == SYS_AT_OK) {
-                socket_result = SYS_OK; // reset result
+        if (socket_event > EVT_WAITING) {
+            if (socket_event == EVT_OK) {
+                /* reset to EVT_WAITING for next pass */
+                socket_event = EVT_WAITING;
                 break;
-            } else if (socket_result == SYS_MODEM_ERROR) {
+            } else if (socket_event == EVT_ERROR) {
                 LOG("error configuring firewall\r\n");
                 init_result = APP_LISTENER_INIT_FAILED;
                 break;
@@ -131,7 +151,7 @@ void app_listener_run(void)
 app_socket_state_t app_listener_tick(void)
 {
     if (_listener_data.len > 0) {
-        LOG("_listener_data: %s\r\n", _listener_data.buffer);
+        LOGT("_listener_data: %s\r\n", _listener_data.buffer);
     }
     return APP_INPROC;
 }

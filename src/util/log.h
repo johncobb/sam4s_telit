@@ -12,6 +12,7 @@ void _debug_byte_as_hex( unsigned char byte );
 void _debug_hex_dump( uint8_t * data, int length);
 void _debug_log_float(float f);
 void _debug_log(const char * prefix, const char * fmt, ...);
+void _debug_log_v(const char * prefix, const char * fmt, ...);
 
 
 #define debug_stringz(x) _debug_stringz(x);
@@ -22,9 +23,24 @@ void _debug_log(const char * prefix, const char * fmt, ...);
 #define debug_hex_dump(x,y) _debug_hex_dump(x,y);
 #define debug_log_float(x) _debug_log_float(x);
 #define debug_log(x,y,...) _debug_log(x,y,##__VA_ARGS__);
+#define debug_log_v(x,y,...) _debug_log_v(x,y,##__VA_ARGS__);
 
 #ifdef __APPLE__
 #define LOG(fmt, ...) { debug_log(_tag, fmt, ##__VA_ARGS__); }
+
+    #if defined(LOG_TRACE)
+        #define LOGT(fmt, ...) { debug_log_v(_tag, fmt, ##__VA_ARGS__); }
+    #else
+        #define LOGT(fmt, ...) { int foo = 0; }
+    #endif
+
+    #if defined(LOG_ERROR)
+        #define LOGE(fmt, ...) { debug_log_v(_tag, fmt, ##__VA_ARGS__); }
+    #else
+        #define LOGE(fmt, ...) { int foo = 0; }
+    #endif
+
+
 #else
 #define LOG(fmt, ...) { debug_log(_tag, PSTR(fmt), ##__VA_ARGS__); }
 #endif

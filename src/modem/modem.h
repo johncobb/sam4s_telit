@@ -6,20 +6,18 @@
 #include "modem_defs.h"
 #include "telit.h"
 
-// #ifndef LOG_MODEM_ONDATARECEIVE
-// #define LOG_MODEM_ONDATARECEIVE
-// #endif
-
 #define MODEM_RX_BUFFER_SIZE    128
 #define MODEM_BAUD_RATE         115200
 #define TOKEN_END '\n'
 
 typedef void (*modem_ondatareceive_func_t)(uint8_t *buffer, uint32_t len);
+typedef void (*modem_oneventreceive_func_t) (uint8_t *buffer, uint32_t len);
 typedef void (*modem_connect_func_t)(void);
 typedef void (*modem_ondisconnect_func_t)(void);
 
 typedef struct{
     modem_ondatareceive_func_t on_datareceive;
+    modem_oneventreceive_func_t on_eventreceive;
     modem_connect_func_t on_connect;
     modem_ondisconnect_func_t on_disconnect;
 } modem_event_handler_t;
@@ -34,6 +32,29 @@ typedef enum{
     SYS_MODEM_FAIL
 } sys_result;
 
+typedef enum {
+    EVT_WAITING = 0,
+    EVT_UNKNOWN,
+    EVT_OK,
+    EVT_ERROR,
+    EVT_CONNECT,
+    EVT_NOCARRIER,
+    EVT_PROMPT,
+    EVT_CMGS,
+    EVT_CREG,
+    EVT_CSQ,
+    EVT_MONI,
+    EVT_GPRS_ACT,
+    EVT_SGACT,
+    EVT_CMGL,
+    EVT_CMGR,
+    EVT_SOCKETSTATUS,
+    EVT_SOCKETTATUS_ID,
+    EVT_TIMEOUT,
+    EVT_REMOTECMD,
+    EVT_ACK
+} modem_event_t;
+
 typedef void (*modem_func_t) (void);
 
 typedef struct
@@ -42,29 +63,34 @@ typedef struct
 	uint32_t timeout;
 	uint8_t retries;
 	bool waitresp;
-	sys_result result;
+    // sys_result result;
+    modem_event_t result;
 } at_cmd_t;
 
 
 sys_result modem_init(void);
 
 void modem_set_ondatareceive_func(modem_ondatareceive_func_t fnc);
+void modem_set_oneventreceive_func(modem_oneventreceive_func_t fnc);
 
 void modem_tick(void);
 void modem_write(char *cmd);
 void modem_close(void);
-// sys_result modem_data_handler(char *data);
 
 sys_result modem_data_handler(uint8_t *buffer, uint32_t len);
+
+modem_event_t modem_identify_event(uint8_t *buffer);
 
 
 uint8_t modem_data_available(void);
 uint8_t modem_data_read(void);
+uint8_t modem_get_eventlist_size(void);
 
 
-
-
-
+typedef struct {
+    uint8_t *token;
+    modem_event_t event;
+} modem_event_list_t;
 
 
 #define MODEM_TOKEN_OK				"OK"
@@ -84,5 +110,9 @@ uint8_t modem_data_read(void);
 #define MODEM_TOKEN_SOCKETSTATUS	"#SS:"
 #define MODEM_TOKEN_SOCKETSTATUS_ID	"#SS: %d"
 #define MODEM_TOKEN_REMOTECMD		"$"
+
+
+
+
 
 #endif

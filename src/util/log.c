@@ -32,6 +32,18 @@ void _debug_log(const char * prefix, const char * fmt, ...)
 	va_end(argptr);
 }
 
+void _debug_log_v(const char * prefix, const char * fmt, ...)
+{
+
+	if (prefix) {
+		printf("%s ", prefix);
+	}
+	va_list argptr;
+	va_start(argptr, fmt);
+	vprintf(fmt, argptr);
+	va_end(argptr);
+}
+
 #else
 void _debug_byte_as_hex( unsigned char byte )
 {

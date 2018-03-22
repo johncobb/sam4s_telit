@@ -13,17 +13,17 @@ static const char _tag[] = "modem_config: ";
 
 at_cmd_t at_cfg_commands[] = {
     // fnc_handler, timeout, retries, waitingreply
-    {modem_factory,  		    1000, 0, false, EVT_OK},
-    {modem_echooff,   		    1000, 0, false, EVT_OK},
-    {modem_setinterface,  	    1000, 0, false, EVT_OK},
-    {modem_setmsgformat,  	    1000, 0, false, EVT_OK},
-    {modem_setcontext,   	    1000, 0, false, EVT_OK},
-    {modem_setuserid,   	    1000, 0, false, EVT_OK},
-    {modem_setpassword,  	    1000, 0, false, EVT_OK},
-    {modem_setguardtime, 	    1000, 0, false, EVT_OK},
-    {modem_skipesc, 		    1000, 0, false, EVT_OK},
-    {modem_mobileequiperr,      1000, 0, false, EVT_OK},
-    {modem_activatecontext,      1000, 0, false, EVT_OK},
+    {modem_factory,  		    1000, 0, false, EVT_WAITING, NULL},
+    {modem_echooff,   		    1000, 0, false, EVT_WAITING, NULL},
+    {modem_setinterface,  	    1000, 0, false, EVT_WAITING, NULL},
+    {modem_setmsgformat,  	    1000, 0, false, EVT_WAITING, NULL},
+    {modem_setcontext,   	    1000, 0, false, EVT_WAITING, NULL},
+    {modem_setuserid,   	    1000, 0, false, EVT_WAITING, NULL},
+    {modem_setpassword,  	    1000, 0, false, EVT_WAITING, NULL},
+    {modem_setguardtime, 	    1000, 0, false, EVT_WAITING, NULL},
+    {modem_skipesc, 		    1000, 0, false, EVT_WAITING, NULL},
+    {modem_mobileequiperr,      1000, 0, false, EVT_WAITING, NULL},
+    {modem_activatecontext,      1000, 0, false, EVT_WAITING, modem_handle_activatecontext},
     {NULL, 0, 0, NULL}
 };
 
@@ -32,13 +32,36 @@ at_cmd_t *at_cmd;
 
 void modem_cfg_ondatareceive_func(uint8_t *buffer, uint32_t len)
 {
-    LOGT("modem_cfg_ondatareceive_func: bytes: %d buffer: %s\r\n", len, buffer);
+    LOG("modem_cfg_ondatareceive_func: bytes: %d buffer: %s\r\n", len, buffer);
 }
 
 void modem_cfg_oneventreceive_func(uint8_t *buffer, uint32_t len)
 {
-    LOGT("modem_cfg_oneventreceive_func: bytes: %d buffer: %s\r\n", len, buffer);
-    at_cmd->result = modem_identify_event(buffer);
+    LOG("modem_cfg_oneventreceive_func: bytes: %d buffer: %s\r\n", len, buffer);
+    // at_cmd->result = modem_identify_event(buffer);
+
+    if (at_cmd->fnc_eventhandler == NULL) {
+        LOG("at_cmd->fnc_eventhandler: NULL\r\n");
+
+        uint8_t *ptr = NULL;
+        uint8_t result = modem_parse_event(MODEM_TOKEN_OK, buffer, &ptr);
+
+        if (result > 0) {
+            at_cmd->result = EVT_OK;
+        } else {
+            at_cmd->result = EVT_ERROR;
+        }
+    } else {
+        LOG("calling fnc_eventhandler: \r\n");
+        uint8_t result = at_cmd->fnc_eventhandler(buffer);
+
+        if (result > 0) {
+            at_cmd->result = EVT_OK;
+        } else {
+            at_cmd->result = EVT_ERROR;
+        }        
+    }
+    
 }
 
 void modem_config_init()
@@ -47,13 +70,13 @@ void modem_config_init()
     /*
      * modem event handler for receiving bulk data from servers.
      */
-    modem_set_ondatareceive_func(modem_cfg_ondatareceive_func);
+    // modem_set_ondatareceive_func(modem_cfg_ondatareceive_func);
     
     /*
      * modem event handler for receiving modem events
      * Example: \r\nOK\r\n \r\nCONNECT\r\n
      */
-    modem_set_ondatareceive_func(modem_cfg_oneventreceive_func);
+    modem_set_oneventreceive_func(modem_cfg_oneventreceive_func);
 }
 
 modem_cfg_state_t modem_config_tick(void)
@@ -70,9 +93,9 @@ modem_cfg_state_t modem_config_tick(void)
             // printf("at_cmd->result: %d\r\n", at_cmd->result);
 
             /*
-             * Check to see if we have a response greater than SYS_OK
+             * Check to see if we have a response greater than EVT_WAITING
              */
-            if (at_cmd->result > SYS_OK) {
+            if (at_cmd->result > EVT_WAITING) {
                 /* we are no longer waiting for a reply. */
                 at_cmd->waitresp = false;
 
@@ -121,6 +144,7 @@ modem_cfg_state_t modem_config_tick(void)
     // printf("dispatch func_handler: \r\n");
     at_cmd->fnc_handler();
     at_cmd->waitresp = true;
+
 
     /*
      * We are currently in process

@@ -95,7 +95,6 @@ void modem_loop(void)
 
 void config_loop(void)
 {
-    // modem_init();
     modem_config_init();
 
     while (true) {
@@ -127,7 +126,7 @@ int main(void)
 
 
     /* Configure the modem */
-    // config_loop();
+    config_loop();
 
     
 

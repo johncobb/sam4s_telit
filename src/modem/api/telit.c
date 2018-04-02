@@ -178,65 +178,103 @@ void modem_socketaccept(modem_socket_t socket)
 	modem_write(buffer);
 }
 
+uint8_t modem_handle_default(uint8_t *buffer)
+{
+	uint8_t *ptr = NULL;
+	return modem_parse_event(MODEM_TOKEN_OK, buffer, &ptr);	
+}
+
 
 uint8_t modem_handle_activatecontext(uint8_t *buffer)
 {
-	// Example Response:	#SGACT: 10.117.64.31
-	if (!sscanf(buffer, "#SGACT: %3d.%3d.%3d.%3d", &modem_status.ip[0], &modem_status.ip[1], &modem_status.ip[2], &modem_status.ip[3])) {
-		modem_status.ip[0] = 0;
-		modem_status.ip[1] = 0;
-		modem_status.ip[2] = 0;
-		modem_status.ip[3] = 0;
+	uint8_t *ptr = NULL;
+	uint8_t result = modem_parse_event(MODEM_TOKEN_SGACT, buffer, &ptr);
+		
+	/*
+	 * https://www.tutorialspoint.com/c_standard_library/c_function_sscanf.htm
+	 * Example Response:	#SGACT: 10.117.64.31
+	 */		
+	if (result > 0) {
+		if (!sscanf(ptr, "#SGACT: %3d.%3d.%3d.%3d", &modem_status.ip[0], &modem_status.ip[1], &modem_status.ip[2], &modem_status.ip[3])) {
 
-		LOGE("modem_handle_activatecontext: error parsing event!\r\n");
-		return 0;
-	}	
+			LOGE("modem_handle_activatecontext: error parsing event!\r\n");
+			return 0;
+		}	
+	}
 
 	LOG("modem_handle_activatecontext: ip: %d.%d.%d.%d\r\n", modem_status.ip[0], modem_status.ip[1], modem_status.ip[2], modem_status.ip[3]);
 
 	return 1;
-	
 }
 
 
-void modem_handle_querycontext(uint8_t *buffer)
+uint8_t modem_handle_querycontext(uint8_t *buffer)
 {
-	// Example Response:	#SGACT: 1,0
-	if (!sscanf(buffer, "#SGACT: %1d,%1d", &modem_status.context.cid, &modem_status.context.status)) {
-		modem_status.context.cid = 0;
-		modem_status.context.status = 0;
-		LOGE("modem_handle_querycontext: error parsing event!\r\n");
-	}	
+	uint8_t *ptr = NULL;
+	uint8_t result = modem_parse_event(MODEM_TOKEN_SGACT, buffer, &ptr);
+
+	/*
+	 * https://www.tutorialspoint.com/c_standard_library/c_function_sscanf.htm
+	 * Example Response:	#SGACT: 1,0
+	 */		
+	if (result > 0) {
+		if (!sscanf(ptr, "#SGACT: %1d,%1d", &modem_status.context.cid, &modem_status.context.status)) {
+
+			LOGE("modem_handle_querycontext: error parsing event!\r\n");
+			return 0;
+		}		
+	}
+
 	LOG("modem_handle_context: cid: %d status: %d\r\n", modem_status.context.cid, modem_status.context.status);
 	
+	return 1;
 }
 
-void modem_handle_creg(uint8_t *buffer)
+uint8_t modem_handle_creg(uint8_t *buffer)
 {
+	uint8_t *ptr = NULL;
+	uint8_t result = modem_parse_event(MODEM_TOKEN_CREG, buffer, &ptr);
 
-	// Example Response "+CREG: 0,1," // Module not registered not searching
-	// Example Response "+CREG: 1,1," // Registered, home network
-	// Example Response "+CREG: 2,1," // Not registered but currently searching...
 
-	if (!sscanf(buffer, "+CREG: %1d,%1d", &modem_status.creg.status, &modem_status.creg.access_technology)) {
-		modem_status.creg.status = 0;
-		modem_status.creg.access_technology = 0;
-		LOGE("modem_handle_creg: error parsing event!\r\n");
-	}	
+	/*
+	 * https://www.tutorialspoint.com/c_standard_library/c_function_sscanf.htm
+	 * Example Response "+CREG: 0,1,":  Module not registered not searching
+	 * Example Response "+CREG: 1,1,":  Registered, home network
+	 * Example Response "+CREG: 2,1,":  Not registered but currently searching...
+	 */	
+	if (result > 0) {
+		if (!sscanf(ptr, "+CREG: %1d,%1d", &modem_status.creg.status, &modem_status.creg.access_technology)) {
+
+			LOGE("modem_handle_creg: error parsing event!\r\n");
+			return 0;
+		}	
+	}
+
+	LOG("modem_handle_creg: status: %d access_technology: %d\r\n", modem_status.creg.status, modem_status.creg.access_technology);
+
+	return 1;
 }
 
-void modem_handle_signalstrength(uint8_t *buffer)
+uint8_t modem_handle_signalstrength(uint8_t *buffer)
 {
+	uint8_t *ptr = NULL;
+	uint8_t result = modem_parse_event(MODEM_TOKEN_CSQ, buffer, &ptr);
+
 	/*
 	 * https://www.tutorialspoint.com/c_standard_library/c_function_sscanf.htm
 	 * Example Response:	+CSQ: 14,2
 	 */
-	if (!sscanf(buffer, "+CSQ: %2d,%2d", &modem_status.signal.rssi, &modem_status.signal.ber)) {
-		modem_status.signal.rssi = -1;
-		modem_status.signal.ber = -1;
-		LOGE("modem_handle_signalstrength: error parsing event!\r\n");
+	if (result > 0) {
+		if (!sscanf(ptr, "+CSQ: %2d,%2d", &modem_status.signal.rssi, &modem_status.signal.ber)) {
+
+			LOGE("modem_handle_signalstrength: error parsing event!\r\n");
+			return 0;
+		}
 	}
 
+	LOG("modem_handle_signalstrength: rssi: %d ber: %d\r\n", modem_status.signal.rssi, modem_status.signal.ber);
+
+	return 1;
 }
 
 

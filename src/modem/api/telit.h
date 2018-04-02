@@ -77,11 +77,11 @@ void modem_socketsend(char * cmd);
 void modem_socketstatus(modem_socket_t socket);
 void modem_socketaccept(modem_socket_t socket);
 
-
-void modem_handle_querycontext(uint8_t *);
+uint8_t modem_handle_default(uint8_t *);
+uint8_t modem_handle_querycontext(uint8_t *);
 uint8_t modem_handle_activatecontext(uint8_t *);
-void modem_handle_creg(uint8_t *);
-void modem_handle_signalstrength(uint8_t *);
+uint8_t modem_handle_creg(uint8_t *);
+uint8_t modem_handle_signalstrength(uint8_t *);
 
 
 #endif

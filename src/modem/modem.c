@@ -137,7 +137,6 @@ void modem_handle_data(void)
         if (c == ((uint8_t)TOKEN_END)) {
             if (++token_count == 2) {
                 token_count = 0;
-                // modem_evt.on_datareceive(buffer, (i+1));
                 modem_evt.on_eventreceive(buffer, (i+1));
                 break;
             }

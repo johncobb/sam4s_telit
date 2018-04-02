@@ -13,16 +13,16 @@ static const char _tag[] = "modem_config: ";
 
 at_cmd_t at_cfg_commands[] = {
     // fnc_handler, timeout, retries, waitingreply
-    {modem_factory,  		    1000, 0, false, EVT_WAITING, NULL},
-    {modem_echooff,   		    1000, 0, false, EVT_WAITING, NULL},
-    {modem_setinterface,  	    1000, 0, false, EVT_WAITING, NULL},
-    {modem_setmsgformat,  	    1000, 0, false, EVT_WAITING, NULL},
-    {modem_setcontext,   	    1000, 0, false, EVT_WAITING, NULL},
-    {modem_setuserid,   	    1000, 0, false, EVT_WAITING, NULL},
-    {modem_setpassword,  	    1000, 0, false, EVT_WAITING, NULL},
-    {modem_setguardtime, 	    1000, 0, false, EVT_WAITING, NULL},
-    {modem_skipesc, 		    1000, 0, false, EVT_WAITING, NULL},
-    {modem_mobileequiperr,      1000, 0, false, EVT_WAITING, NULL},
+    {modem_factory,  		    1000, 0, false, EVT_WAITING, modem_handle_default},
+    {modem_echooff,   		    1000, 0, false, EVT_WAITING, modem_handle_default},
+    {modem_setinterface,  	    1000, 0, false, EVT_WAITING, modem_handle_default},
+    {modem_setmsgformat,  	    1000, 0, false, EVT_WAITING, modem_handle_default},
+    {modem_setcontext,   	    1000, 0, false, EVT_WAITING, modem_handle_default},
+    {modem_setuserid,   	    1000, 0, false, EVT_WAITING, modem_handle_default},
+    {modem_setpassword,  	    1000, 0, false, EVT_WAITING, modem_handle_default},
+    {modem_setguardtime, 	    1000, 0, false, EVT_WAITING, modem_handle_default},
+    {modem_skipesc, 		    1000, 0, false, EVT_WAITING, modem_handle_default},
+    {modem_mobileequiperr,      1000, 0, false, EVT_WAITING, modem_handle_default},
     {modem_activatecontext,      1000, 0, false, EVT_WAITING, modem_handle_activatecontext},
     {NULL, 0, 0, NULL}
 };
@@ -38,20 +38,11 @@ void modem_cfg_ondatareceive_func(uint8_t *buffer, uint32_t len)
 void modem_cfg_oneventreceive_func(uint8_t *buffer, uint32_t len)
 {
     LOG("modem_cfg_oneventreceive_func: bytes: %d buffer: %s\r\n", len, buffer);
-    // at_cmd->result = modem_identify_event(buffer);
 
-    if (at_cmd->fnc_eventhandler == NULL) {
-        LOG("at_cmd->fnc_eventhandler: NULL\r\n");
-
-        uint8_t *ptr = NULL;
-        uint8_t result = modem_parse_event(MODEM_TOKEN_OK, buffer, &ptr);
-
-        if (result > 0) {
-            at_cmd->result = EVT_OK;
-        } else {
-            at_cmd->result = EVT_ERROR;
-        }
-    } else {
+    /*
+     * Make sure the funciton handler is assigned
+     */
+    if (at_cmd->fnc_eventhandler != NULL) {
         LOG("calling fnc_eventhandler: \r\n");
         uint8_t result = at_cmd->fnc_eventhandler(buffer);
 
@@ -59,7 +50,9 @@ void modem_cfg_oneventreceive_func(uint8_t *buffer, uint32_t len)
             at_cmd->result = EVT_OK;
         } else {
             at_cmd->result = EVT_ERROR;
-        }        
+        }  
+    } else {
+        LOGE("*** undefined modem_eventreceived function handler ***\r\n");
     }
     
 }
@@ -90,7 +83,10 @@ modem_cfg_state_t modem_config_tick(void)
          * a command sent to the modem.
          */
         if (at_cmd->waitresp) {
-            // printf("at_cmd->result: %d\r\n", at_cmd->result);
+            
+            /*
+             * TODO: Implement a freaking timeout already, we don't have all day :\
+             */
 
             /*
              * Check to see if we have a response greater than EVT_WAITING

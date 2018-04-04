@@ -52,6 +52,7 @@ typedef enum {
     EVT_SOCKETTATUS_ID,
     EVT_TIMEOUT,
     EVT_REMOTECMD,
+    EVT_RING,
     EVT_ACK
 } modem_event_t;
 
@@ -139,6 +140,7 @@ extern modem_status_t modem_status;
 #define MODEM_TOKEN_SOCKETSTATUS	"#SS:"
 #define MODEM_TOKEN_SOCKETSTATUS_ID	"#SS: %d"
 #define MODEM_TOKEN_REMOTECMD		"$"
+#define MODEM_TOKEN_RING            "SRING:"
 #define MODEM_TOKEN_CMEERROR        "+CME ERROR:"
 
 #endif

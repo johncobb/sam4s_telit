@@ -85,7 +85,7 @@
 #define MODEM_CMD_SOCKETOPEN		"AT#SD=%d,%d,%d,\"%s\",0,0\r"
 #define MODEM_CMD_SOCKETCLOSE		"AT#SH=%d\r"
 #define MODEM_CMD_SOCKETRESUME		"AT#SO=%d\r"
-#define MODEM_CMD_SOCKETLISTEN		"AT#SL=%d,%d,%d\r"
+#define MODEM_CMD_SOCKETLISTEN		"AT#SL=%d,1,%d\r"
 #define MODEM_CMD_SOCKETACCEPT		"AT#SA=%d\r"
 #define MODEM_CMD_SOCKETSUSPEND		"+++"
 #define MODEM_CMD_SOCKETSTATUS		"AT#SS\r"

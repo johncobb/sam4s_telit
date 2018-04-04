@@ -29,52 +29,52 @@ socket_t _listener;
 
 void socket_init_loop(void)
 {
-    modem_socket_t modem_socket = {
-        .connection_id = 0,
-        .protocol = TCPIP,
-        .port = 1337,
-        .address = NULL
-    };
+    // modem_socket_t modem_socket = {
+    //     .connection_id = 0,
+    //     .protocol = TCPIP,
+    //     .port = 1337,
+    //     .address = NULL
+    // };
 
-    socket_config_t socket_config = {
-        .connection_id = 1,
-        .cid = 1,
-        .packet_size = 512,
-        .max_to = 90,
-        .conn_to = 600,
-        .tx_to = 2
-    };
+    // socket_config_t socket_config = {
+    //     .connection_id = 1,
+    //     .cid = 1,
+    //     .packet_size = 512,
+    //     .max_to = 90,
+    //     .conn_to = 600,
+    //     .tx_to = 2
+    // };
 
-    firewall_entry_t entry = {
-        .action = FW_ACCEPT,
-        .ip_address = "172.18.1.1",
-        .net_mask = "255.255.0.0"
-    };
+    // firewall_entry_t entry = {
+    //     .action = FW_ACCEPT,
+    //     .ip_address = "172.18.1.1",
+    //     .net_mask = "255.255.0.0"
+    // };
     
-    socket_t _listener = {
-        .modem_socket = &modem_socket,
-        .socket_config = &socket_config,
-        .firewall = &entry,
-        .state = 0,
-        .substate = 0,
-        .timeout = 0,
-        .event = ondatareceive_func,
-        .on_datareceive = onsocketdatareceive_func
-    };
+    // socket_t _listener = {
+    //     .modem_socket = &modem_socket,
+    //     .socket_config = &socket_config,
+    //     .firewall = &entry,
+    //     .state = 0,
+    //     .substate = 0,
+    //     .timeout = 0,
+    //     .event = ondatareceive_func,
+    //     .on_datareceive = onsocketdatareceive_func
+    // };
 
     /*
      * The following tests the reservation of the maximum amount of sockets.
      */
 
-    int loop_count = 0;
-    while (true) {
-        if (socket_new(&_listener) == SCK_SUCCESS) {
-            log_socket_settings(socket_pool[loop_count]);
-            loop_count++;
-        } else {
-            break;
-        } 
-    }
+    // int loop_count = 0;
+    // while (true) {
+    //     if (socket_new(&_listener) == SCK_SUCCESS) {
+    //         log_socket_settings(socket_pool[loop_count]);
+    //         loop_count++;
+    //     } else {
+    //         break;
+    //     } 
+    // }
 
 }
 
@@ -128,13 +128,11 @@ int main(void)
     /* Configure the modem */
     config_loop();
 
-    
-
     if (app_listener_init() == APP_LISTENER_INIT_SUCCESS) {
-        while (true) {
-            /* Call the tick of our app listener */
-            app_listener_tick();
-        }
+
+        LOG("app_listener_run: \r\n");
+        app_listener_run();
+
     }
 
     // clock_loop();

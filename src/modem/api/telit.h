@@ -51,9 +51,10 @@ void modem_setuserid(void);
 void modem_setpassword(void);
 void modem_setguardtime();
 void modem_skipesc(void);
-void modem_socketconfig(socket_config_t config);
-void modem_firewallcfg(firewall_entry_t entry);
-
+// void modem_socketconfig(socket_config_t config);
+void modem_socketconfig(socket_config_t *);
+// void modem_firewallcfg(firewall_entry_t);
+void modem_firewallcfg(firewall_entry_t *);
 
 
 void modem_querycontext(void);
@@ -69,7 +70,8 @@ void modem_mobileequiperr(void);
 
 
 void modem_socketopen(modem_socket_t socket);
-void modem_socketlisten(modem_socket_t socket);
+// void modem_socketlisten(modem_socket_t socket);
+void modem_socketlisten(modem_socket_t *);
 void modem_socketclose(modem_socket_t socket);
 void modem_socketresume(modem_socket_t socket);
 void modem_socketsuspend(void);

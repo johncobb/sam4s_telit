@@ -34,7 +34,8 @@ modem_event_list_t modem_events[] = {
     {MODEM_TOKEN_CMGL, EVT_CMGL, NULL},
     {MODEM_TOKEN_CMGR, EVT_CMGR, NULL},
     {MODEM_TOKEN_SOCKETSTATUS, EVT_SOCKETSTATUS, NULL},
-    {MODEM_TOKEN_REMOTECMD, EVT_REMOTECMD, NULL}
+    {MODEM_TOKEN_REMOTECMD, EVT_REMOTECMD, NULL},
+    {MODEM_TOKEN_RING, EVT_RING, NULL}
 };
 
 // void modem_handle_activatecontext(uint8_t *buffer)

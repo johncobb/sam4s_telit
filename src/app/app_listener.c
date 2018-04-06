@@ -65,7 +65,7 @@ socket_config_t socket_config = {
     .cid = 1,
     .packet_size = 512,
     .max_to = 90,
-    .conn_to = 600,
+    .conn_to = 150, /* 600 = 60 sec. */
     .tx_to = 2
 };
 
@@ -147,27 +147,27 @@ app_listener_init_status_t app_listener_init(void)
     }
 
     /* Configure socket firewall entries */
-    LOG("modem_firewallcfg: \r\n");
-    modem_firewallcfg(_listener.firewall);
+    // LOG("modem_firewallcfg: \r\n");
+    // modem_firewallcfg(_listener.firewall);
 
-    while(true) {
-        /*
-         * Process modem resposne.
-         */
-        modem_tick();
+    // while(true) {
+    //     /*
+    //      * Process modem resposne.
+    //      */
+    //     modem_tick();
 
-        if (socket_event > EVT_WAITING) {
-            if (socket_event == EVT_OK) {
-                /* reset to EVT_WAITING for next pass */
-                socket_event = EVT_WAITING;
-                break;
-            } else if (socket_event == EVT_ERROR) {
-                LOG("error configuring firewall\r\n");
-                init_result = APP_LISTENER_INIT_FAILED;
-                break;
-            }
-        }  
-    }
+    //     if (socket_event > EVT_WAITING) {
+    //         if (socket_event == EVT_OK) {
+    //             /* reset to EVT_WAITING for next pass */
+    //             socket_event = EVT_WAITING;
+    //             break;
+    //         } else if (socket_event == EVT_ERROR) {
+    //             LOG("error configuring firewall\r\n");
+    //             init_result = APP_LISTENER_INIT_FAILED;
+    //             break;
+    //         }
+    //     }  
+    // }
 
     return init_result;
 
@@ -179,6 +179,18 @@ app_listener_init_status_t app_listener_init(void)
 
 void app_listener_run(void)
 {
+
+    while(true) {
+        _cph_delay_ms(1000);
+        LOG("app_listener_run: waiting...\r\n");
+    }
+    /*
+     * Modem socket listen workflow
+     * Activate Context: "AT#SGACT=1,1\r" 
+     * Socket Listen:    "AT#SL=1,1,1337\r" <connId: 1..6>, < listenState: 0-close socket listening, 1-start socket listening>
+     * modem-response: SRING: 1
+     * Socket Accept: AT#SA=1,0 <connId 1..6>, <connMode 0 -online mode, 1-command mode connection>
+     */
 
     LOG("modem_socketlisten: \r\n");
     modem_socketlisten(_listener.modem_socket);

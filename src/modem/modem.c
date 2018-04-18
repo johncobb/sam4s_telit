@@ -16,26 +16,38 @@ static const char _tag[] PROGMEM = "modem: "; /* used in embedded gcc */
 static const char _tag[] = "modem: ";
 #endif
 
+// void modem_handle_activatecontext(uint8_t*);
 
 modem_event_list_t modem_events[] = {
-    {MODEM_TOKEN_OK, EVT_OK},
-    {MODEM_TOKEN_ERROR, EVT_ERROR},
-    {MODEM_TOKEN_CONNECT, EVT_CONNECT},
-    {MODEM_TOKEN_NOCARRIER, EVT_NOCARRIER},
-    {MODEM_TOKEN_PROMPT, EVT_PROMPT},
-    {MODEM_TOKEN_CMGS, EVT_CMGS},
-    {MODEM_TOKEN_CREG, EVT_CREG},
-    {MODEM_TOKEN_CSQ, EVT_CSQ},
-    {MODEM_TOKEN_MONI, EVT_MONI},
-    {MODEM_TOKEN_GPRS_ACT, EVT_GPRS_ACT},
-    {MODEM_TOKEN_SGACT, EVT_SGACT},
-    {MODEM_TOKEN_ACK, EVT_ACK},
-    {MODEM_TOKEN_CMGL, EVT_CMGL},
-    {MODEM_TOKEN_CMGR, EVT_CMGR},
-    {MODEM_TOKEN_SOCKETSTATUS, EVT_SOCKETSTATUS},
-    {MODEM_TOKEN_SOCKETSTATUS_ID, EVT_SOCKETTATUS_ID},
-    {MODEM_TOKEN_REMOTECMD, EVT_REMOTECMD}
+    {MODEM_TOKEN_OK, EVT_OK, NULL},
+    {MODEM_TOKEN_ERROR, EVT_ERROR, NULL},
+    {MODEM_TOKEN_CONNECT, EVT_CONNECT, NULL},
+    {MODEM_TOKEN_NOCARRIER, EVT_NOCARRIER, NULL},
+    {MODEM_TOKEN_PROMPT, EVT_PROMPT, NULL},
+    {MODEM_TOKEN_CMGS, EVT_CMGS, NULL},
+    {MODEM_TOKEN_CREG, EVT_CREG, modem_handle_creg},
+    {MODEM_TOKEN_CSQ, EVT_CSQ, modem_handle_signalstrength},
+    {MODEM_TOKEN_MONI, EVT_MONI, NULL},
+    {MODEM_TOKEN_GPRS_ACT, EVT_GPRS_ACT, NULL},
+    {MODEM_TOKEN_SGACT, EVT_SGACT, modem_handle_activatecontext},
+    {MODEM_TOKEN_ACK, EVT_ACK, NULL},
+    {MODEM_TOKEN_CMGL, EVT_CMGL, NULL},
+    {MODEM_TOKEN_CMGR, EVT_CMGR, NULL},
+    {MODEM_TOKEN_SOCKETSTATUS, EVT_SOCKETSTATUS, NULL},
+    {MODEM_TOKEN_REMOTECMD, EVT_REMOTECMD, NULL},
+    {MODEM_TOKEN_RING, EVT_RING, NULL}
 };
+
+// void modem_handle_activatecontext(uint8_t *buffer)
+// {
+// 	// example result: #SGACT: 1,0
+//     buffer+=10;
+//     // modem_status.context = ((buffer[0]-'0'));
+//     // LOG("creg: %d\r\n", modem_status.creg);
+//     LOG("creg: %d\r\n", ((buffer[0]-'0')));
+// }
+
+
 
 uint8_t modem_get_eventlist_size(void)
 {
@@ -46,6 +58,7 @@ static usart_ring_buffer_t modem_ring_buffer = {{0}, 0, 0};
 
 modem_event_handler_t modem_evt;
 
+modem_status_t modem_status;
 
 
 void hw_init(void);
@@ -59,6 +72,7 @@ void modem_rx_cb(uint8_t c)
 
 void modem_set_ondatareceive_func(modem_ondatareceive_func_t func)
 {
+    LOGT("modem_set_ondatareceive_func: \r\n");
     modem_evt.on_datareceive = func;
 }
 
@@ -68,6 +82,7 @@ void modem_set_ondatareceive_func(modem_ondatareceive_func_t func)
  */
 void modem_set_oneventreceive_func(modem_oneventreceive_func_t func)
 {
+    LOGT("modem_set_oneventreceive_func: \r\n");
     modem_evt.on_eventreceive = func;
 }
 
@@ -123,7 +138,7 @@ void modem_handle_data(void)
         if (c == ((uint8_t)TOKEN_END)) {
             if (++token_count == 2) {
                 token_count = 0;
-                modem_evt.on_datareceive(buffer, (i+1));
+                modem_evt.on_eventreceive(buffer, (i+1));
                 break;
             }
 
@@ -197,6 +212,8 @@ void modem_write(char *cmd)
     usart_tx(cmd, len);   
 }
 
+
+
 /* modem_parse_event parses out tokens sent back from modem to identify event */
 uint8_t modem_parse_event(uint8_t *token, uint8_t *buffer, uint8_t **ptr_out)
 {
@@ -220,6 +237,7 @@ uint8_t modem_parse_event(uint8_t *token, uint8_t *buffer, uint8_t **ptr_out)
 
 modem_event_t modem_identify_event(uint8_t *buffer)
 {
+    // LOG("modem_identify_event: \r\n");
     /*
      * Loop through the modem_events array to determine the modem event.
      * Example: response "OK" -> EVT_OK
@@ -229,6 +247,16 @@ modem_event_t modem_identify_event(uint8_t *buffer)
         uint8_t *ptr = NULL;
 
         if (modem_parse_event(modem_events[i].token, buffer, &ptr) > 0) {
+            /*
+             * TODO: Research better way to handle results. for example the following modem events
+             * command AT#SGACT=1,1 to activate context results in #SGACT: 10.0.0.1
+             * command AT#SGACT? to query context results in #SGACT: 1,0
+             * bot commands require different handling which cannot be carried out by a single
+             * fnc_handler for each modem event!
+             */
+            // if (modem_events[i].fnc_handler != NULL) {
+            //     modem_events[i].fnc_handler(ptr);
+            // }
             return modem_events[i].event;
             break;
         }
@@ -236,88 +264,3 @@ modem_event_t modem_identify_event(uint8_t *buffer)
     /* Well we didn't see this coming */
     return EVT_UNKNOWN;
 }
-
-
-
-sys_result modem_data_handler2(uint8_t *buffer, uint32_t len) {
-
-    char *ptr = NULL;
-
-    if ((ptr = strstr(buffer, "OK"))) {
-        return SYS_AT_OK;
-    } else if ((ptr = strstr(buffer, "CONNECT"))) {
-        return SYS_AT_CONNECT;
-    } else if ((ptr = strstr(buffer, "ERROR"))) {
-        LOGE("error: %s\r\n", buffer);
-        return SYS_MODEM_ERROR;
-    } else if ((ptr = strstr(buffer, "NO CARRIER"))) {
-        return SYS_MODEM_NOCARRIER;
-    } else {
-        return SYS_OK;
-    }
-}
-
-// void modem_event_t modem_identify_event(uint8_t *buffer)
-// {
-//     if ((ptr = strstr(buffer, "OK"))) {
-//         return SYS_AT_OK;
-//     } else if ((ptr = strstr(buffer, "CONNECT"))) {
-//         return SYS_AT_CONNECT;
-//     } else if ((ptr = strstr(buffer, "ERROR"))) {
-//         LOGE("error: %s\r\n", buffer);
-//         return SYS_MODEM_ERROR;
-//     } else if ((ptr = strstr(buffer, "NO CARRIER"))) {
-//         return SYS_MODEM_NOCARRIER;
-//     } else {
-//         return SYS_OK;
-//     }   
-// }
-
-// sys_result modem_data_handler(char *data){
-
-//     char *ptr = NULL;
-
-//     if ((ptr = strstr(data, "OK"))) {
-//         return SYS_AT_OK;
-//     } else if ((ptr = strstr(data, "CONNECT"))) {
-//         return SYS_AT_CONNECT;
-//     } else if ((ptr = strstr(data, "ERROR"))) {
-//         printf("error: %s\r\n", data);
-//         return SYS_MODEM_ERROR;
-//     } else if ((ptr = strstr(data, "NO CARRIER"))) {
-//         return SYS_MODEM_NOCARRIER;
-//     } else {
-//         return SYS_OK;
-//     }
-// }
-
-
-// sys_result handle_result(char *token, char **ptr_out)
-// {
-// 	if ((ptr = strstr(modem_rx_buffer, token))) {
-// 		if(ptr_out != NULL) {
-// 			*ptr_out = ptr;
-// 		}
-// 		printf("SYS_AT_OK\r\n");
-// 		return SYS_AT_OK;
-// 	} else if ((ptr = strstr(modem_rx_buffer, MODEM_TOKEN_ERROR))) {
-// 		if(ptr_out != NULL) {
-// 			*ptr_out = ptr;
-// 		}
-// 		printf("SYS_MODEM_ERROR\r\n");
-// 		return SYS_MODEM_ERROR;
-// 	} else if ((ptr = strstr(modem_rx_buffer, MODEM_TOKEN_NOCARRIER))) {
-// 		if(ptr_out != NULL) {
-// 			*ptr_out = ptr;
-// 		}
-// 		printf("SYS_MODEM_NOCARRIER\r\n");
-// 		return SYS_MODEM_NOCARRIER;
-// 	}
-
-// 	// set ptr_out to the rx_buffer for troubleshooting
-// 	if (ptr_out != NULL) {
-// 		*ptr_out = modem_rx_buffer;
-//     }
-    
-//     return SYS_OK;
-// }

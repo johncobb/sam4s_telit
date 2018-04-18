@@ -9,6 +9,8 @@ int _socket_pool_index = -1;
 /* Initialize our socket pool as array of NULL sockets */
 socket_t* socket_pool[6] = {NULL, NULL, NULL, NULL, NULL, NULL};
 
+void init_socket2(modem_socket_t *, socket_protocol_t, uint16_t);
+
 /*
  * Reserve the next socket in the pool and assign the socket variable a pointer
  * to that entry in the array. Assign the event handling and other configuration
@@ -50,7 +52,11 @@ socket_status_t socket_new(socket_t *socket)
     socket_status_t status = socket_reserve(socket);
 
     if (status == SCK_SUCCESS) {
-        socket->modem_socket->connection_id = _socket_pool_index;
+        /*
+         * Assign connection_id the _socket_pool_index
+         * add one to index to prevent connection_id = 0
+         */
+        socket->modem_socket->connection_id = (_socket_pool_index+1);
     } 
 
     return status;

@@ -52,10 +52,13 @@ typedef enum {
     EVT_SOCKETTATUS_ID,
     EVT_TIMEOUT,
     EVT_REMOTECMD,
+    EVT_RING,
     EVT_ACK
 } modem_event_t;
 
 typedef void (*modem_func_t) (void);
+// typedef void (*modem_eventhandler_func_t) (uint8_t *);
+typedef uint8_t (*modem_eventhandler_func_t) (uint8_t *);
 
 typedef struct
 {
@@ -63,8 +66,8 @@ typedef struct
 	uint32_t timeout;
 	uint8_t retries;
 	bool waitresp;
-    // sys_result result;
     modem_event_t result;
+    modem_eventhandler_func_t fnc_eventhandler;
 } at_cmd_t;
 
 
@@ -77,20 +80,47 @@ void modem_tick(void);
 void modem_write(char *cmd);
 void modem_close(void);
 
-sys_result modem_data_handler(uint8_t *buffer, uint32_t len);
-
-modem_event_t modem_identify_event(uint8_t *buffer);
-
+sys_result modem_data_handler(uint8_t *, uint32_t);
+modem_event_t modem_identify_event(uint8_t *);
 
 uint8_t modem_data_available(void);
 uint8_t modem_data_read(void);
 uint8_t modem_get_eventlist_size(void);
 
+uint8_t modem_parse_event(uint8_t *, uint8_t *, uint8_t **);
+
 
 typedef struct {
-    uint8_t *token;
+    char *token;
     modem_event_t event;
+    modem_eventhandler_func_t fnc_handler;
 } modem_event_list_t;
+
+typedef struct {
+    int rssi;
+    int ber;
+} modem_signal_t;
+
+typedef struct {
+    uint8_t status;
+    uint8_t access_technology;
+} modem_creg_t;
+
+typedef struct {
+    uint8_t cid;
+    uint8_t status;
+} modem_context_t;
+
+typedef struct
+{
+    int ip[4];
+	uint8_t busy;
+    modem_context_t context;
+    modem_signal_t signal;
+    modem_creg_t creg;
+} modem_status_t;
+
+extern modem_status_t modem_status;
 
 
 #define MODEM_TOKEN_OK				"OK"
@@ -110,9 +140,7 @@ typedef struct {
 #define MODEM_TOKEN_SOCKETSTATUS	"#SS:"
 #define MODEM_TOKEN_SOCKETSTATUS_ID	"#SS: %d"
 #define MODEM_TOKEN_REMOTECMD		"$"
-
-
-
-
+#define MODEM_TOKEN_RING            "SRING: %d"
+#define MODEM_TOKEN_CMEERROR        "+CME ERROR:"
 
 #endif

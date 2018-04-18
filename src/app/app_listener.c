@@ -197,7 +197,7 @@ void app_listener_run(void)
 
     while(true) {
         /*
-         * Process modem resposne.
+         * Process modem response.
          */        
         modem_tick();
 

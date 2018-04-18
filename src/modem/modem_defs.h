@@ -66,7 +66,9 @@
 // #define MODEM_CMD_FIREWALLCFG		"AT#FRWL=1,\"172.18.1.1\",\"255.255.0.0\"\r"
 #define MODEM_CMD_FIREWALLCFG		"AT#FRWL=%d,\"%s\",\"%s\"\r"
 
-#define MODEM_CMD_SETCONTEXT		"AT+CGDCONT=1,\"IP\",\"a10.korem2m.com\"\r"
+ #define MODEM_CMD_SETCONTEXT		"AT+CGDCONT=1,\"IP\",\"a10.korem2m.com\"\r"
+// #define MODEM_CMD_SETCONTEXT		"AT+CGDCONT=1,\"IP\",\"11583.mcs\"\r" /* Telit apn */
+
 #define MODEM_CMD_DIAL				"ATD*99***1#\r"
 
 //#define MODEM_CMD_SETCONTEXT		"AT+CGDCONT=1,\"IP\",\"c1.korem2m.com\"\r"
@@ -74,7 +76,7 @@
 #define MODEM_CMD_QUERYCONTEXT		"AT#SGACT?\r"
 #define MODEM_CMD_DEACTCONTEXT		"AT#SGACT=1,0\r"
 #define MODEM_CMD_LISTENUDP			"AT#SLUDP=1,1,3500\r"
-#define MODEM_CMD_SETGUARDTIME		"ATS12=2\r" // fiftiety of a second so (.02*2)=.04 seconds
+#define MODEM_CMD_SETGUARDTIME		"ATS12=2\r" // fiftieth of a second so (.02*2)=.04 seconds
 #define MODEM_CMD_SKIPESC			"AT#SKIPESC=1\r"
 // #define MODEM_CMD_SOCKETCFG			"AT#SCFG=1,1,512,90,600,2\r"
 #define MODEM_CMD_SOCKETCFG 		"AT#SCFG=%d,%d,%d,%d,%d,%d\r"
@@ -90,6 +92,39 @@
 #define MODEM_CMD_SOCKETSUSPEND		"+++"
 #define MODEM_CMD_SOCKETSTATUS		"AT#SS\r"
 #define MODEM_CMD_SOCKETLISTEN_EX	"AT#SL=2,1,1337\r"
+
+
+/*
+ * 3GPP TS 27.007 AT Commands
+ * 5.4.1 General
+ */
+
+#define MODEM_CMD_MANUFACTURERID   "AT+CGMI\r"
+#define MODEM_CMD_MODELID          "AT+CGMM\r"
+#define MODEM_CMD_REVISIONID       "AT+CGMR\r"
+#define MODEM_CMD_SERIALNUMBER     "AT+CGSN\r"
+
+/*
+ * 5.1.4.3 Network Service Handling
+ */
+#define MODEM_CMD_SUBSCRIBERNUM       "AT+CNUM\r"
+#define MODEM_CMD_OPERATORNAMES       "AT+COPN\r"
+#define MODEM_CMD_NETWORKREGSATUS     "AT+CREG?\r"
+#define MODEM_CMD_OPERATORSELECTION   "AT+COPS?\r"
+
+/*
+ * 5.1.4.6 Commands for GPRS
+ */
+#define MODEM_CMD_MOBILESTATIONCLASS  "AT+CGCLASS?\r"
+#define MODEM_CMD_GPRSSTATE           "AT+CGATT?\r"
+#define MODEM_CMD_GPRSSTATE           "AT+CGATT?\r"
+
+/*
+ * Battery Charger
+ */
+#define MODEM_CMD_BATTERYCHARGE        "AT+CBC\r"
+
+
 
 
 

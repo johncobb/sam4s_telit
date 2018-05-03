@@ -34,7 +34,12 @@ void modem_setband(void)
 
 void modem_setcontext(void)
 {
-	modem_write(MODEM_CMD_SETCONTEXT);
+	/* "AT+CGDCONT=1,\"IP\",\"c1.korem2m.com\"\r\r" */
+	char buffer[128] = {0};
+
+	sprintf(buffer, MODEM_CMD_SETCONTEXT, MODEM_PDPCONTEXT_ID, MODEM_PDPCONTEXT_TYPE, MODEM_PDPCONTEXT_APN);
+
+	modem_write(buffer);
 }
 
 void modem_setuserid(void)
@@ -132,7 +137,12 @@ void modem_dropfirewall(void)
 
 void modem_mobileequiperr(void)
 {
-	modem_write(MODEM_CMD_MOBILEEQUIPERR);
+	/* AT+CMEE=1 */
+	char buffer[128] = {0};
+
+	sprintf(buffer, MODEM_CMD_MOBILEEQUIPERR, MODEM_CMEE_LOGLEVEL);
+
+	modem_write(buffer);
 }
 
 // void modem_socketlisten(modem_socket_t socket)
@@ -217,7 +227,8 @@ uint8_t modem_handle_activatecontext(uint8_t *buffer)
 {
 	uint8_t *ptr = NULL;
 	uint8_t result = modem_parse_event(MODEM_TOKEN_SGACT, buffer, &ptr);
-		
+
+	
 	/*
 	 * https://www.tutorialspoint.com/c_standard_library/c_function_sscanf.htm
 	 * Example Response:	#SGACT: 10.117.64.31

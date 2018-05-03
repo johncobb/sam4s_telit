@@ -4,23 +4,48 @@
 
 #include <cph.h>
 
+/*
+ * Do this to get connected to a socket from terminal
+ * ATZ
+ * AT#SELINT=2
+ * AT+CMGF=1
+ * AT+CGDCONT=1,"IP","c1.korem2m.com" or "11583.mcs" for telit
+ * AT#SCFG=1,1,512,90,600,2
+ * ATS12=2
+ * AT#SKIPESC=1
+ * AT+CMEE=2
+ * AT#SGACT=1,1
+ * AT#SD=1,0,80,"www.google.com",0,0,1
+ * AT#FRWL=1,"172.18.1.1","255.255.0.0"
+ * AT+CPSMS Power Savings Mode
+ * AT+CEDRXS Extended Discontinuous Reception
+ */
 
-#define MODEM_SOCKET_IPENDPOINT	"bs.cphandheld.com" // 1888
+ // Return loss of 20db 1% of signal reflected
+ // Return loss of 10db 10% of signal reflected
+ // Return loss of 3db  50% of signal reflected
 
-#define MODEM_DEFAULT_HTTPSERVER	"www.google.com"
-// #define MODEM_DEFAULT_HTTPSERVER	"bs.cphandheld.com" // 1888
-#define MODEM_DEFAULT_HTTPREQUEST	"GET / HTTP/1.1\r\nHost: www.google.com\r\nConnection: keep-alive\r\n\r\n"
+
+#define MODEM_CMEE_LOGLEVEL         1                   /* 0 - Error, 1 - Numeric Format, 2 - Verbose Format */
+#define MODEM_PDPCONTEXT_ID         1
+#define MODEM_PDPCONTEXT_TYPE       "IP"
+#define MODEM_PDPCONTEXT_APN        "11583.mcs"         /* Telit Public */
+// #define MODEM_PDPCONTEXT_APN        "a10.korem2m.com"   /* Kore VPN */
+// #define MODEM_PDPCONTEXT_APN        "c1.korem2m.com"    /* Kore Public */
+
+#define MODEM_IPENDPOINT	        "bs.cphandheld.com"
+
+#define MODEM_HTTPSERVER	        "www.google.com"
+#define MODEM_HTTPREQUEST	        "GET / HTTP/1.1\r\nHost: www.google.com\r\nConnection: keep-alive\r\n\r\n"
 #define MODEM_TOKEN_HTTPOK			"HTTP/1.1 200 OK"
 #define MODEM_TOKEN_HTTPFORBIDDEN	"HTTP/1.1 403"
 #define MODEM_TOKEN_HTTPENDOFFILE	"</html>"
 
-#define MODEM_DEFAULT_SOCKETOPEN_TIMEOUT		20000
-#define MODEM_DEFAULT_SOCKETWRITE_TIMEOUT		10000
-#define MODEM_DEFAULT_SOCKETSUSPEND_TIMEOUT		5000
-
+#define MODEM_SOCKETOPEN_TIMEOUT		20000
+#define MODEM_SOCKETWRITE_TIMEOUT		10000
+#define MODEM_SOCKETSUSPEND_TIMEOUT		5000
 // TODO: tunable parameter must change based on S12: MODEM_CMD_SETGUARDTIME
-#define MODEM_DEFUALT_ESCAPEGUARD_TIMEOUT		50
-
+#define MODEM_ESCAPEGUARD_TIMEOUT		50
 #define MODEM_DEFAULT_ATTIMEOUT			1000
 
 // *** modem tokens ***
@@ -52,7 +77,6 @@
 #define MODEM_CMD_ECHOOFF			"ATE0\r"
 #define MODEM_CMD_SELINT			"AT#SELINT=2\r"
 #define MODEM_CMD_ATZ				"ATZ\r"
-
 #define MODEM_CMD_MSGFMT			"AT+CMGF=1\r"
 #define MODEM_CMD_MONI				"AT#MONI\r"
 #define MODEM_CMD_CFUN				"AT+CFUN=1\r"
@@ -62,37 +86,38 @@
 #define MODEM_CMD_QUERYSIGNAL		"AT+CSQ\r"
 #define MODEM_CMD_QUERYFIREWALL		"AT#FRWL?\r"
 #define MODEM_CMD_DROPFIREWALL      "AT#FRWL=2\r"
-#define MODEM_CMD_MOBILEEQUIPERR	"AT+CMEE=2\r"
-// #define MODEM_CMD_FIREWALLCFG		"AT#FRWL=1,\"172.18.1.1\",\"255.255.0.0\"\r"
+#define MODEM_CMD_MOBILEEQUIPERR	"AT+CMEE=%d\r"
 #define MODEM_CMD_FIREWALLCFG		"AT#FRWL=%d,\"%s\",\"%s\"\r"
-
- #define MODEM_CMD_SETCONTEXT		"AT+CGDCONT=1,\"IP\",\"a10.korem2m.com\"\r"
-// #define MODEM_CMD_SETCONTEXT		"AT+CGDCONT=1,\"IP\",\"11583.mcs\"\r" /* Telit apn */
-
 #define MODEM_CMD_DIAL				"ATD*99***1#\r"
+#define MODEM_CMD_SETCONTEXT        "AT+CGDCONT=%d,\"%s\",\"%s\"\r"
+#define MODEM_CMD_SETBAND			"AT#BND=1\r"	// 850/1900 default
+#define MODEM_CMD_SETUSERID			"AT#USERID=\"\"\r"
+#define MODEM_CMD_SETPASSWORD		"AT#PASSW=\"\"\r"
 
-//#define MODEM_CMD_SETCONTEXT		"AT+CGDCONT=1,\"IP\",\"c1.korem2m.com\"\r"
 #define MODEM_CMD_ACTIVATECONTEXT	"AT#SGACT=1,1\r"
+
 #define MODEM_CMD_QUERYCONTEXT		"AT#SGACT?\r"
 #define MODEM_CMD_DEACTCONTEXT		"AT#SGACT=1,0\r"
-#define MODEM_CMD_LISTENUDP			"AT#SLUDP=1,1,3500\r"
-#define MODEM_CMD_SETGUARDTIME		"ATS12=2\r" // fiftieth of a second so (.02*2)=.04 seconds
-#define MODEM_CMD_SKIPESC			"AT#SKIPESC=1\r"
-// #define MODEM_CMD_SOCKETCFG			"AT#SCFG=1,1,512,90,600,2\r"
+#define MODEM_CMD_SKIPESC			"AT#SKIPESC=1\r"	
 #define MODEM_CMD_SOCKETCFG 		"AT#SCFG=%d,%d,%d,%d,%d,%d\r"
+#define MODEM_CMD_SETGUARDTIME		"ATS12=2\r" // fiftieth of a second so (.02*2)=.04 seconds
 #define MODEM_CMD_AUTOCTX			"AT#SGACTCFG=1,3\r"
 #define MODEM_CMD_SENDSMS			"AT+CMGS=\"8126290240\"\r\nHello World\r\n\032"
 
 // socket commands
-#define MODEM_CMD_SOCKETOPEN		"AT#SD=%d,%d,%d,\"%s\",0,0\r"
-#define MODEM_CMD_SOCKETCLOSE		"AT#SH=%d\r"
-#define MODEM_CMD_SOCKETRESUME		"AT#SO=%d\r"
-#define MODEM_CMD_SOCKETLISTEN		"AT#SL=%d,1,%d\r"
-#define MODEM_CMD_SOCKETACCEPT		"AT#SA=%d\r"
-#define MODEM_CMD_SOCKETSUSPEND		"+++"
-#define MODEM_CMD_SOCKETSTATUS		"AT#SS\r"
-#define MODEM_CMD_SOCKETLISTEN_EX	"AT#SL=2,1,1337\r"
-
+#define MODEM_CMD_SOCKETOPEN		    "AT#SD=%d,%d,%d,\"%s\",0,0\r"
+#define MODEM_CMD_SOCKETCLOSE		    "AT#SH=%d\r"
+#define MODEM_CMD_SOCKETRESUME		    "AT#SO=%d\r"
+#define MODEM_CMD_SOCKETLISTEN		    "AT#SL=%d,1,%d\r"
+#define MODEM_CMD_SOCKETACCEPT		    "AT#SA=%d\r"
+#define MODEM_CMD_SOCKETSUSPEND		    "+++"
+#define MODEM_CMD_SOCKETSTATUS		    "AT#SS\r"
+#define MODEM_CMD_SOCKETSTATUS_CONNID   "AT#SS=%d\r"
+#define MODEM_CMD_SOCKETINFO            "AT#SI\r"
+#define MODEM_CMD_SOCKETINFO_CONNID     "AT#SI=%d\r"
+#define MODEM_CMD_SOCKETTYPE            "AT#ST\r"
+#define MODEM_CMD_SOCKETTYPE_CONNID     "AT#ST=%d\r"
+#define MODEM_CMD_LISTENUDP			"AT#SLUDP=1,1,3500\r"
 
 /*
  * 3GPP TS 27.007 AT Commands
@@ -123,48 +148,6 @@
  * Battery Charger
  */
 #define MODEM_CMD_BATTERYCHARGE        "AT+CBC\r"
-
-
-
-
-
-#define MODEM_CMD_SETBAND			"AT#BND=1\r"	// 850/1900 default
-//#define MODEM_CMD_SETCONTEXT		"AT+CGDCONT=1,\"IP\",\"%s\"\r"
-#define MODEM_CMD_SETUSERID			"AT#USERID=\"\"\r"
-#define MODEM_CMD_SETPASSWORD		"AT#PASSW=\"\"\r"
-//#define MODEM_CMD_SETUSERID		"AT#USERID=\"%s\"\r"
-//#define MODEM_CMD_SETPASSWORD	"AT#PASSW=\"%s\"\r"
-
-// socket udp commands
-// #define MODEM_CMD_UDPSOCKETOPEN		"AT#SD=1,1,%d,\"%s\"\r"
-// #define MODEM_CMD_UDPSOCKETCLOSE	"AT#SH=1\r"
-// #define MODEM_CMD_UDPSOCKETRESUME	"AT#SO=1\r"
-// #define MODEM_CMD_UDPSOCKETSUSPEND	"+++"
-
-// socket http commands
-#define MODEM_CMD_HTTPSOCKETOPEN	"AT#SD=1,0,80,\"www.google.com\",0,0\r"
-#define MODEM_CMD_HTTPSOCKETCLOSE	"AT#SH=1\r"
-#define MODEM_CMD_HTTPSOCKETRESUME	"AT#SO=1\r"
-#define MODEM_CMD_HTTPSOCKETSUSPEND	"+++"
-#define MODEM_CMD_HTTPSOCKETGET		"GET / HTTP/1.1\r\nHost: www.google.com\r\nConnection: keep-alive\r\n\r\n"
-
-
-
-
-// typedef struct
-// {
-// 	modem_func_t fnc_handler;
-// 	uint32_t timeout;
-// 	uint8_t retries;
-// 	bool waitingreply;
-// } at_cmd_t;
-
-
-
-
-
-
-
 
 
 #endif

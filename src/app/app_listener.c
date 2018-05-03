@@ -2,7 +2,7 @@
 #include "modem.h"
 #include "telit.h"
 #include "socket.h"
-#include "app_listener.h"
+#include "app.h"
 
 
 #if defined(__arm__)
@@ -103,10 +103,10 @@ void listener_reset_buffer(void)
  * Second set firewall entries that are required for listening
  * Third open the configured connection
  */
-app_listener_init_status_t app_listener_init(void)
+app_init_status_t app_listener_init(void)
 {
     LOG("app_listener_init: \r\n");
-    app_listener_init_status_t init_result = APP_LISTENER_INIT_SUCCESS;
+    app_init_status_t init_result = APP_INIT_SUCCESS;
   
 
     LOG("app_modem_set_ondatareceive_func: \r\n");
@@ -139,7 +139,7 @@ app_listener_init_status_t app_listener_init(void)
                     socket_event = EVT_WAITING;
                     break;
                 } else if (socket_event == EVT_ERROR) {
-                    init_result = APP_LISTENER_INIT_FAILED;
+                    init_result = APP_INIT_FAILED;
                     LOG("error configuring socket\r\n");
                 }
             }  
@@ -171,7 +171,7 @@ app_listener_init_status_t app_listener_init(void)
 
     return init_result;
 
-    return APP_LISTENER_INIT_SUCCESS;
+    return APP_INIT_SUCCESS;
 
 }
 
@@ -214,7 +214,7 @@ void app_listener_run(void)
     }    
 }
 
-app_socket_state_t app_listener_tick(void)
+app_state_t app_listener_tick(void)
 {
     if (_listener_data.len > 0) {
         LOG("_listener_data: %s\r\n", _listener_data.buffer);

@@ -317,4 +317,21 @@ uint8_t modem_handle_signalstrength(uint8_t *buffer)
 }
 
 
+void modem_enablepsm(void)
+{
+
+	/* 
+	 * "AT+CPSMS=1,,,01100001,01100010\r" 
+	 * Pages 99-101 Telit_ME910C1_AT_Commands_Reference_Guide_r2.pdf 
+	 */
+	modem_write(MODEM_CMD_ENABLEPSM);
+}
+
+void modem_disablepsm(void)
+{
+	/* "AT+CPSMS=0\r" */
+	modem_write(MODEM_CMD_DISABLEPSM);	
+}
+
+
 

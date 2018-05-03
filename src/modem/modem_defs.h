@@ -94,6 +94,34 @@
 #define MODEM_CMD_SETUSERID			"AT#USERID=\"\"\r"
 #define MODEM_CMD_SETPASSWORD		"AT#PASSW=\"\"\r"
 
+/* Power Savings Mode Second to last parameeter
+ * T3412 - Timer Duration (how long we'll be asleep)
+ * Binary 000 - 111 = 
+ * 10 minutres
+ * 1 hour
+ * 10 hours
+ * 2 seconds
+ * 30 seconds
+ * 1 minute
+ * 320 hours
+ * deactivated
+ * 
+ * example: 10100010 = decimal 162 = 2 minutes
+ * 
+ * Power Savings Mode Last parameter
+ * T3324 - Time Until PSM
+ * Binar:
+ * 000 2 seconds
+ * 001 1 minute
+ * 010 decihours or 6 minutes
+ * 111 deactivated
+ * 
+ * example: 00100001 = decimal 33 = 1 minute
+ */
+ 
+#define MODEM_CMD_DISABLEPSM		"AT+CPSMS=0\r"
+#define MODEM_CMD_ENABLEPSM		    "AT+CPSMS=1,,,\"10100010\",\"00100001\"\r"
+
 #define MODEM_CMD_ACTIVATECONTEXT	"AT#SGACT=1,1\r"
 
 #define MODEM_CMD_QUERYCONTEXT		"AT#SGACT?\r"

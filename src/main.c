@@ -13,7 +13,7 @@
 #include "modem_config.h"
 #include "socket.h"
 #include "cph_clock.h"
-#include "app_listener.h"
+#include "app.h"
 
 
 #if defined(__arm__)
@@ -134,14 +134,21 @@ int main(void)
 
 
     /* Configure the modem */
-    config_loop();
+    // config_loop();
 
-    if (app_listener_init() == APP_LISTENER_INIT_SUCCESS) {
+    // if (app_listener_init() == APP_INIT_SUCCESS) {
 
-        LOG("app_listener_run: \r\n");
-        app_listener_run();
+    //     LOG("app_listener_run: \r\n");
+    //     app_listener_run();
 
-    }
+    // }
+
+    if (app_powersave_init() == APP_INIT_SUCCESS) {
+
+        LOG("app_powersave_run: \r\n");
+        app_powersave_run();
+
+    }    
 
     // clock_loop();
     // socket_init_loop();

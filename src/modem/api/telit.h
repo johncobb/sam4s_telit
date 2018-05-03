@@ -56,6 +56,9 @@ void modem_socketconfig(socket_config_t *);
 // void modem_firewallcfg(firewall_entry_t);
 void modem_firewallcfg(firewall_entry_t *);
 
+void modem_enablepsm(void);
+void modem_disablepsm(void);
+
 
 void modem_querycontext(void);
 void modem_autocontext(void);

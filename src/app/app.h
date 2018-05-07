@@ -20,6 +20,12 @@ typedef enum {
     APP_INIT_FAILED
 } app_init_status_t;
 
+typedef struct
+{
+    uint8_t *buffer;
+    uint32_t len;
+} app_data_t;
+
 
 app_init_status_t app_listener_init(void);
 app_state_t app_listener_tick(void);
@@ -27,5 +33,8 @@ app_state_t app_listener_tick(void);
 
 app_init_status_t app_powersave_init(void);
 app_state_t app_powersave_tick(void);
+
+app_init_status_t app_sender_init(void);
+app_state_t app_sender_tick(void);
 
 #endif

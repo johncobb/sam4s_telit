@@ -163,12 +163,12 @@ void modem_socketlisten(modem_socket_t *socket)
 	modem_write(buffer);
 }
 
-void modem_socketopen(modem_socket_t socket)
+void modem_socketopen(modem_socket_t *socket)
 {
 	/* "AT#SD=1,1,2012,\"vq1.cphandheld.com\"\r" */
     char buffer[128] = {0};
 
-	sprintf(buffer, MODEM_CMD_SOCKETOPEN, socket.connection_id, socket.protocol, socket.port, socket.address);
+	sprintf(buffer, MODEM_CMD_SOCKETOPEN, socket->connection_id, socket->protocol, socket->port, socket->address);
 	modem_write(buffer);
 }
 

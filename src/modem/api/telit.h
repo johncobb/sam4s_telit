@@ -72,7 +72,8 @@ void modem_mobileequiperr(void);
 
 
 
-void modem_socketopen(modem_socket_t socket);
+// void modem_socketopen(modem_socket_t socket);
+void modem_socketopen(modem_socket_t *socket);
 // void modem_socketlisten(modem_socket_t socket);
 void modem_socketlisten(modem_socket_t *);
 void modem_socketclose(modem_socket_t socket);

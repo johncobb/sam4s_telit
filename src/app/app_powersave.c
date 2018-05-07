@@ -13,13 +13,8 @@ static const char _tag[] = "app_powersave: ";
 
 modem_event_t psm_event = EVT_OK;
 
-typedef struct
-{
-    uint8_t *buffer;
-    uint32_t len;
-} app_powersave_data_t;
 
-app_powersave_data_t _powersave_data;
+app_data_t _powersave_data;
 
 
 /*
@@ -76,8 +71,8 @@ app_init_status_t app_powersave_init(void)
     modem_enablepsm();    
 
     /*
-        * Wait to see if we successfully configured socket.
-        */
+     * Wait to see if we successfully configured socket.
+     */
     while(true) {
         /*
             * Process modem response.

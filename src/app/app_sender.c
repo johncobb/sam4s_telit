@@ -139,6 +139,11 @@ app_init_status_t app_sender_init(void)
 void app_sender_run(void)
 {
     
+    modem_gps_factorydefault();
+    modem_gps_setpower(GPS_POWERUP);
+    modem_gps_reset(GPS_RST_HOTSTART);
+    
+
     while(true) {
         _cph_delay_ms(1000);
         LOG("app_sender_run: waiting...\r\n");

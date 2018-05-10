@@ -150,6 +150,14 @@
 #define MODEM_CMD_SOCKETTYPE_CONNID     "AT#ST=%d\r"
 #define MODEM_CMD_LISTENUDP			"AT#SLUDP=1,1,3500\r"
 
+
+/* GPS Commands */
+#define MODEM_GPS_FACTORYDEFAULT        "AT$GPSRST\r"
+#define MODEM_GPS_PWRMGT                "AT$GPSP=%d\r"
+#define MODEM_GPS_MODULERESET           "AT$GPSR=%d\r"
+#define MODEM_GPS_GETPOSITION           "AT$GPSACP\r"
+
+
 /*
  * 3GPP TS 27.007 AT Commands
  * 5.4.1 General

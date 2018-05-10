@@ -70,6 +70,13 @@ void modem_queryfirewall(void);
 void modem_dropfirewall(void);
 void modem_mobileequiperr(void);
 
+void modem_gps_factorydefault(void);
+void modem_gps_setpower(uint8_t);
+void modem_gps_reset(uint8_t);
+void modem_gps_getposition(void);
+
+
+
 
 
 // void modem_socketopen(modem_socket_t socket);

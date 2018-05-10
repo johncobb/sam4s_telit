@@ -122,6 +122,18 @@ typedef struct
 
 extern modem_status_t modem_status;
 
+typedef enum {
+    GPS_RST_FACTORY = 1,
+    GPS_RST_COLDSTART,
+    GPS_RST_WARMSTART,
+    GPS_RST_HOTSTART
+} gps_reset_type_t;
+
+typedef enum {
+    GPS_POWERDOWN = 0,
+    GPS_POWERUP
+} gps_powermgt_t;
+
 
 #define MODEM_TOKEN_OK				"OK"
 #define MODEM_TOKEN_ERROR			"ERROR"

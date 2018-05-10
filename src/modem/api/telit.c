@@ -145,6 +145,51 @@ void modem_mobileequiperr(void)
 	modem_write(buffer);
 }
 
+
+
+void modem_gps_factorydefault(void)
+{
+	/* AT$AT$GPSRST */
+	modem_write(MODEM_GPS_FACTORYDEFAULT);
+}
+
+/*
+ *
+ * Power up clears GPS memory and then starts the GPS receiver. GPS data cleaning is performed on the base of the current value of the <reset_type> parameter set
+ * during modem_gps_reset()
+ * - GPS operation mode is performed on the base of the current values of $GPSSLSR configuration (see $GPSSLSR).
+ * - <status> value is stored through $GPSSAV command.
+ */
+void modem_gps_setpower(uint8_t state)
+{
+	/* AT$GPSP=0 */
+	char buffer[128] = {0};
+
+	sprintf(buffer, MODEM_GPS_PWRMGT, state);
+
+	modem_write(buffer);
+}
+
+void modem_gps_reset(uint8_t reset_type)
+{
+	/* AT$GPSR=0 */
+	char buffer[128] = {0};
+
+	sprintf(buffer, MODEM_GPS_MODULERESET, reset_type);
+
+	modem_write(buffer);
+}
+
+void modem_gps_getposition(void)
+{
+	/* AT$GPSACP */
+	modem_write(MODEM_GPS_GETPOSITION);
+}
+
+
+
+
+
 // void modem_socketlisten(modem_socket_t socket)
 // {
 // 	/* "AT#SL=2,1,1337\r" */

@@ -3,6 +3,8 @@
 #include "telit.h"
 #include "socket.h"
 #include "app.h"
+#include "geodesity.pb.h"
+#include "pb_encode.h"
 
 
 #if defined(__arm__)
@@ -10,6 +12,8 @@ static const char _tag[] PROGMEM = "app_sender: "; /* used in embedded gcc */
 #else
 static const char _tag[] = "app_sender: ";
 #endif
+
+Event evt = {"SimLynx", (EventType)2, 0, 0, {Heartbeat_init_default}};
 
 static modem_event_t socket_event = EVT_OK;
 static app_data_t _app_data;
@@ -138,8 +142,22 @@ app_init_status_t app_sender_init(void)
 
 void app_sender_run(void)
 {
-    
-    modem_gps_factorydefault();
+    /*
+     * Start of protobuf message
+     */
+    /*
+    evt.type = (EventType)2;
+    struct tm t;
+    time_t t_of_day;
+
+    t.tm_mday = (2018-1900)/10000;
+    t.tm_mon = 0;
+    t.tm_year = 18;
+    */
+
+
+
+    // modem_gps_factorydefault();
     modem_gps_setpower(GPS_POWERUP);
     modem_gps_reset(GPS_RST_HOTSTART);
     

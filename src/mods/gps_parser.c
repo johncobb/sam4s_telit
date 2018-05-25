@@ -11,7 +11,7 @@ typedef struct {
 } gps_utc_t;
 
 typedef struct {
-    uint8_t deg;
+    int deg;
     float min;
 } gps_coordinate_t;
 
@@ -19,12 +19,15 @@ typedef struct {
     gps_utc_t utc;
     uint32_t millis;
     gps_coordinate_t lat;
+    gps_coordinate_t lng;
 	uint8_t lat_deg;
 	uint32_t lat_min;
 	uint8_t lon_deg;
 	uint32_t lon_min;
 	int32_t alt;
-	uint8_t fix;
+    uint8_t fix;
+    char ns;
+    char ew;
 } gps_position;
 
 static volatile gps_position _position;
@@ -131,11 +134,13 @@ void parse_position(gps_position *pos, char *lat_str, char *lon_str, char *alt_s
 void parse_gps(char *gps_msg) {
 
 
-    if (!sscanf(gps_msg, "$GPSACP: %2d%2d%2d.%3d,%2d%7f",&_p.utc.hh, &_p.utc.mm, &_p.utc.ss, &_p.utc.nn, &_p.lat.deg, &_p.lat.min)) {
+    if (!sscanf(gps_msg, "$GPSACP: %2d%2d%2d.%3d,%2d%7f%s,%3d",&_p.utc.hh, &_p.utc.mm, &_p.utc.ss, &_p.utc.nn, &_p.lat.deg, &_p.lat.min, &_p.ns, &_p.lng.deg)) {
         printf("sscanf error occured!\r\n");
     }
 
-    printf("hh:mm:ss:nn deg:mm %d %d %d %d %d %f\r\n", _p.utc.hh, _p.utc.mm, _p.utc.ss, _p.utc.nn, _p.lat.deg, _p.lat.min);
+    printf("hh:mm:ss:nn deg:mm %d %d %d %d %d %f %c %d\r\n", _p.utc.hh, _p.utc.mm, _p.utc.ss, _p.utc.nn, _p.lat.deg, _p.lat.min, _p.ns, _p.lng.deg);
+
+    return;
     char utc[7];
     char millis[3];
 	char lat_buf[12];

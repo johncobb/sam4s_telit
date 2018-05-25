@@ -122,6 +122,30 @@ typedef struct
 
 extern modem_status_t modem_status;
 
+typedef struct 
+{
+    int hh;
+    int mm;
+    int ss;
+} gps_utc_t;
+
+typedef struct
+{
+    gps_utc_t utc;  /* UTCtime (hhmmss.sss) (referenced to GGA sentence) */
+    float lat;  /* Latitude ddmm.mmmm N/S (referenced to GGA sentence) */
+    float lng;  /* Longitude dddmm.mmmm E/W (referenced to GGA sentence) */
+    int hdop;   /* Horizontal Dilution of Precision */
+    int alt;    /* Altitude mean-sea-level in meters */
+    int fix;    /* 0 or 1 Invalid or Valid Fix */
+    int cog;    /* Course over ground */
+    int spkm;   /* Speed over ground Km/Hr */
+    int spkn;   /* Speed over ground Kt/Hr */
+    int date;   /* Date of fix ddmmyy (referenced to RMC Sentence) */
+    int nsat;   /* Total number of satellites in use */
+} gps_position_t;
+
+extern gps_position_t gps_position;
+
 typedef enum {
     GPS_RST_FACTORY = 1,
     GPS_RST_COLDSTART,
